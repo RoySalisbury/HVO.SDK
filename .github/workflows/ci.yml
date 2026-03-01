@@ -114,6 +114,7 @@ jobs:
       # Dynamic badges via gist (requires GIST_TOKEN secret with gist scope)
       - name: Update line coverage badge
         if: github.ref == 'refs/heads/main' && always()
+        continue-on-error: true
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
@@ -127,6 +128,7 @@ jobs:
 
       - name: Update branch coverage badge
         if: github.ref == 'refs/heads/main' && always()
+        continue-on-error: true
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
@@ -140,6 +142,7 @@ jobs:
 
       - name: Update tests badge
         if: github.ref == 'refs/heads/main' && always()
+        continue-on-error: true
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
