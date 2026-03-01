@@ -31,11 +31,15 @@ public readonly struct OneOf<T1, T2> : IOneOf
     /// <summary>
     /// Creates a OneOf from the first type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T1</returns>
     public static OneOf<T1, T2> FromT1(T1 value) => new OneOf<T1, T2>(0, value, default);
 
     /// <summary>
     /// Creates a OneOf from the second type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T2</returns>
     public static OneOf<T1, T2> FromT2(T2 value) => new OneOf<T1, T2>(1, default, value);
 
     /// <summary>
@@ -104,6 +108,10 @@ public readonly struct OneOf<T1, T2> : IOneOf
     /// <summary>
     /// Pattern matches on the contained value
     /// </summary>
+    /// <typeparam name="TResult">The return type of the match</typeparam>
+    /// <param name="f1">Function to invoke when the value is T1</param>
+    /// <param name="f2">Function to invoke when the value is T2</param>
+    /// <returns>The result of invoking the matching function</returns>
     public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2)
     {
         if (f1 == null) throw new ArgumentNullException(nameof(f1));
@@ -120,6 +128,8 @@ public readonly struct OneOf<T1, T2> : IOneOf
     /// <summary>
     /// Pattern matches on the contained value (void version)
     /// </summary>
+    /// <param name="f1">Action to invoke when the value is T1</param>
+    /// <param name="f2">Action to invoke when the value is T2</param>
     public void Switch(Action<T1> f1, Action<T2> f2)
     {
         if (f1 == null) throw new ArgumentNullException(nameof(f1));
@@ -136,16 +146,21 @@ public readonly struct OneOf<T1, T2> : IOneOf
     /// <summary>
     /// Implicitly converts a value of type T1 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2>(T1 value) => FromT1(value);
 
     /// <summary>
     /// Implicitly converts a value of type T2 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2>(T2 value) => FromT2(value);
 
     /// <summary>
     /// Returns a string representation of the contained value
     /// </summary>
+    /// <returns>The string representation of the value, or <see cref="string.Empty"/> if null</returns>
     public override string ToString() => Value?.ToString() ?? string.Empty;
 }
 
@@ -177,16 +192,22 @@ public readonly struct OneOf<T1, T2, T3> : IOneOf
     /// <summary>
     /// Creates a OneOf from the first type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T1</returns>
     public static OneOf<T1, T2, T3> FromT1(T1 value) => new OneOf<T1, T2, T3>(0, value, default, default);
 
     /// <summary>
     /// Creates a OneOf from the second type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T2</returns>
     public static OneOf<T1, T2, T3> FromT2(T2 value) => new OneOf<T1, T2, T3>(1, default, value, default);
 
     /// <summary>
     /// Creates a OneOf from the third type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T3</returns>
     public static OneOf<T1, T2, T3> FromT3(T3 value) => new OneOf<T1, T2, T3>(2, default, default, value);
 
     /// <summary>
@@ -276,6 +297,11 @@ public readonly struct OneOf<T1, T2, T3> : IOneOf
     /// <summary>
     /// Pattern matches on the contained value
     /// </summary>
+    /// <typeparam name="TResult">The return type of the match</typeparam>
+    /// <param name="f1">Function to invoke when the value is T1</param>
+    /// <param name="f2">Function to invoke when the value is T2</param>
+    /// <param name="f3">Function to invoke when the value is T3</param>
+    /// <returns>The result of invoking the matching function</returns>
     public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3)
     {
         if (f1 == null) throw new ArgumentNullException(nameof(f1));
@@ -294,6 +320,9 @@ public readonly struct OneOf<T1, T2, T3> : IOneOf
     /// <summary>
     /// Pattern matches on the contained value (void version)
     /// </summary>
+    /// <param name="f1">Action to invoke when the value is T1</param>
+    /// <param name="f2">Action to invoke when the value is T2</param>
+    /// <param name="f3">Action to invoke when the value is T3</param>
     public void Switch(Action<T1> f1, Action<T2> f2, Action<T3> f3)
     {
         if (f1 == null) throw new ArgumentNullException(nameof(f1));
@@ -312,21 +341,28 @@ public readonly struct OneOf<T1, T2, T3> : IOneOf
     /// <summary>
     /// Implicitly converts a value of type T1 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3>(T1 value) => FromT1(value);
 
     /// <summary>
     /// Implicitly converts a value of type T2 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3>(T2 value) => FromT2(value);
 
     /// <summary>
     /// Implicitly converts a value of type T3 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3>(T3 value) => FromT3(value);
 
     /// <summary>
     /// Returns a string representation of the contained value
     /// </summary>
+    /// <returns>The string representation of the value, or <see cref="string.Empty"/> if null</returns>
     public override string ToString() => Value?.ToString() ?? string.Empty;
 }
 
@@ -361,21 +397,29 @@ public readonly struct OneOf<T1, T2, T3, T4> : IOneOf
     /// <summary>
     /// Creates a OneOf from the first type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T1</returns>
     public static OneOf<T1, T2, T3, T4> FromT1(T1 value) => new OneOf<T1, T2, T3, T4>(0, value, default, default, default);
 
     /// <summary>
     /// Creates a OneOf from the second type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T2</returns>
     public static OneOf<T1, T2, T3, T4> FromT2(T2 value) => new OneOf<T1, T2, T3, T4>(1, default, value, default, default);
 
     /// <summary>
     /// Creates a OneOf from the third type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T3</returns>
     public static OneOf<T1, T2, T3, T4> FromT3(T3 value) => new OneOf<T1, T2, T3, T4>(2, default, default, value, default);
 
     /// <summary>
     /// Creates a OneOf from the fourth type
     /// </summary>
+    /// <param name="value">The value to wrap</param>
+    /// <returns>A new OneOf containing the value as T4</returns>
     public static OneOf<T1, T2, T3, T4> FromT4(T4 value) => new OneOf<T1, T2, T3, T4>(3, default, default, default, value);
 
     /// <summary>
@@ -486,6 +530,12 @@ public readonly struct OneOf<T1, T2, T3, T4> : IOneOf
     /// <summary>
     /// Pattern matches on the contained value
     /// </summary>
+    /// <typeparam name="TResult">The return type of the match</typeparam>
+    /// <param name="f1">Function to invoke when the value is T1</param>
+    /// <param name="f2">Function to invoke when the value is T2</param>
+    /// <param name="f3">Function to invoke when the value is T3</param>
+    /// <param name="f4">Function to invoke when the value is T4</param>
+    /// <returns>The result of invoking the matching function</returns>
     public TResult Match<TResult>(Func<T1, TResult> f1, Func<T2, TResult> f2, Func<T3, TResult> f3, Func<T4, TResult> f4)
     {
         if (f1 == null) throw new ArgumentNullException(nameof(f1));
@@ -506,6 +556,10 @@ public readonly struct OneOf<T1, T2, T3, T4> : IOneOf
     /// <summary>
     /// Pattern matches on the contained value (void version)
     /// </summary>
+    /// <param name="f1">Action to invoke when the value is T1</param>
+    /// <param name="f2">Action to invoke when the value is T2</param>
+    /// <param name="f3">Action to invoke when the value is T3</param>
+    /// <param name="f4">Action to invoke when the value is T4</param>
     public void Switch(Action<T1> f1, Action<T2> f2, Action<T3> f3, Action<T4> f4)
     {
         if (f1 == null) throw new ArgumentNullException(nameof(f1));
@@ -526,25 +580,34 @@ public readonly struct OneOf<T1, T2, T3, T4> : IOneOf
     /// <summary>
     /// Implicitly converts a value of type T1 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3, T4>(T1 value) => FromT1(value);
 
     /// <summary>
     /// Implicitly converts a value of type T2 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3, T4>(T2 value) => FromT2(value);
 
     /// <summary>
     /// Implicitly converts a value of type T3 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3, T4>(T3 value) => FromT3(value);
 
     /// <summary>
     /// Implicitly converts a value of type T4 to a OneOf
     /// </summary>
+    /// <param name="value">The value to convert</param>
+    /// <returns>A new OneOf containing the value</returns>
     public static implicit operator OneOf<T1, T2, T3, T4>(T4 value) => FromT4(value);
 
     /// <summary>
     /// Returns a string representation of the contained value
     /// </summary>
+    /// <returns>The string representation of the value, or <see cref="string.Empty"/> if null</returns>
     public override string ToString() => Value?.ToString() ?? string.Empty;
 }
