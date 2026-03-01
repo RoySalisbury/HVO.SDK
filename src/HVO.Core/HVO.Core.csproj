@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>HVO.Core</PackageId>
+    <Version>1.0.0</Version>
+    <Description>Foundation library for HVO projects — Result&lt;T&gt;, Option&lt;T&gt;, OneOf discriminated unions, extension methods, and guard utilities.</Description>
+    <PackageTags>hvo;core;result;option;oneof;discriminated-union;functional;utilities;guard;extensions</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <RootNamespace>HVO.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

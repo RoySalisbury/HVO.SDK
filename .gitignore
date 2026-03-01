@@ -1,0 +1,36 @@
+## Build outputs
+[Bb]in/
+[Oo]bj/
+
+## IDE / Editor
+.vs/
+.vscode/.history/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+*.swp
+*~
+
+## NuGet
+*.nupkg
+*.snupkg
+artifacts/
+
+## Test results
+TestResults/
+coverage-report/
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## Secrets - never commit
+*.pfx
+appsettings.*.local.json
+
+## Env files
+.env
+.env.local

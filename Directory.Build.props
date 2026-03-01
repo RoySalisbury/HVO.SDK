@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <!-- Language & Build Settings -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Shared NuGet Metadata -->
+    <Authors>Roy Salisbury</Authors>
+    <Company>HVO</Company>
+    <Copyright>Copyright © HVO 2024-2026</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/RoySalisbury/HVO.SDK</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RoySalisbury/HVO.SDK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Build Quality -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Strong Naming -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)HVO.SDK.snk</AssemblyOriginatorKeyFile>
+    <HvoPublicKey>0602000000a40000525341310008000001000100b729572a7e720036788eeb42d2396410b9487d823b6a588dd61406dce7ee8ea56ce0b2d26fc9ed723a8ab61d4ae559616d3c1927517c348b942875d492948833b9099036faefc125ef7f97eec8b1b31b684e340cb63c2eff0f285e611c8c2c1569015a81fafda330312e138fe3f731f66a73e2eb7c7f5c12ee2f3cdc3df3f8c772b1f70806c12ffe0c2c51bd0930269de057ededa9cb981de715c03f16deb0714f9c09ef673a1987bacbc28b50efff61b63341ec1e5a4c074d82f3637e45dc34ec1f1c56ef03d104da97da8853cb120df15a8283a17881ca8d5c4c748a40e4c27861267174a34fef7ddf81663e353fd23103d4777e89f3055c85143942868da0</HvoPublicKey>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+</Project>
