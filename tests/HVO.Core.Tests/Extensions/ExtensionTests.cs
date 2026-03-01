@@ -223,7 +223,7 @@ public class CollectionExtensionsTests
     public void Shuffle_ReturnsSameElements()
     {
         var items = new[] { 1, 2, 3, 4, 5 };
-        var shuffled = items.Shuffle().ToList();
+        var shuffled = HvoCollectionExtensions.Shuffle(items).ToList();
 
         CollectionAssert.AreEquivalent(items, shuffled);
     }
