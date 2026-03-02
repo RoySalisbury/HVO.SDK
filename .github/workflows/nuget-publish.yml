@@ -53,8 +53,10 @@ jobs:
           dotnet-version: |
             9.0.x
             10.0.x
+      - name: Build
+        run: dotnet build --configuration Release
       - name: Pack all projects
-        run: dotnet pack --configuration Release --output ./artifacts
+        run: dotnet pack --configuration Release --no-build --output ./artifacts
       - uses: actions/upload-artifact@v7
         with:
           name: nuget-packages
