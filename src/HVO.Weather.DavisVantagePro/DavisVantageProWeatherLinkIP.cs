@@ -27,8 +27,6 @@ namespace HVO.Weather.DavisVantagePro
     {
         private bool _disposed;
         private readonly IPEndPoint _ipEndPoint;
-        private readonly object _syncLock = new object();
-
         /// <summary>
         /// Occurs when a valid console data record (LOOP packet) is received.
         /// </summary>
@@ -88,8 +86,7 @@ namespace HVO.Weather.DavisVantagePro
 
             task.ContinueWith(t =>
             {
-                Thread.Sleep(10000);
-                StartMonitor();
+                Task.Delay(10000).ContinueWith(_ => StartMonitor());
             }, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
 
@@ -303,15 +300,6 @@ namespace HVO.Weather.DavisVantagePro
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Finalizer releases unmanaged resources.
-        /// </summary>
-        ~DavisVantageProWeatherLinkIP()
-        {
-            Dispose(false);
         }
 
         #endregion

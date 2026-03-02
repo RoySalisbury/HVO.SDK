@@ -20,7 +20,7 @@ namespace HVO.Weather.DavisVantagePro
     {
         private DavisVantageProConsoleRecord(byte[] rawDataRecord, DateTimeOffset recordDateTime)
         {
-            RawDataRecord = rawDataRecord;
+            RawDataRecord = (byte[])rawDataRecord.Clone();
             RecordDateTime = recordDateTime;
         }
 
@@ -106,7 +106,7 @@ namespace HVO.Weather.DavisVantagePro
             {
                 Barometer = barometer / 1000.0,
                 BarometerTrend = (BarometerTrend)barometerTrend,
-                ConsoleBatteryVoltage = ((consoleBatteryVoltage * 300) / 512) / 100.0,
+                ConsoleBatteryVoltage = (consoleBatteryVoltage * 300.0 / 512.0) / 100.0,
                 DailyETAmount = dailyETAmount / 1000.0,
                 DailyRainAmount = dailyRainAmount / 100.0,
                 ForecastIcons = (ForecastIcon)forecastIcons,
@@ -146,9 +146,8 @@ namespace HVO.Weather.DavisVantagePro
         {
             using (var crc16 = new Crc16())
             {
-                ushort calculatedCrcValue = BitConverter.ToUInt16(crc16.ComputeHash(rawDataRecord, 0, 97), 0);
-                ushort originalCrcValue = BitConverter.ToUInt16(rawDataRecord, 97);
-                return calculatedCrcValue == originalCrcValue;
+                byte[] calculatedCrc = crc16.ComputeHash(rawDataRecord, 0, 97);
+                return calculatedCrc[0] == rawDataRecord[97] && calculatedCrc[1] == rawDataRecord[98];
             }
         }
 

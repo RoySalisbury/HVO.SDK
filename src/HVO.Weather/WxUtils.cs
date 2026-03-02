@@ -374,7 +374,13 @@ namespace HVO.Weather
         /// <returns>A <see cref="Temperature"/> representing the dew point.</returns>
         public static Temperature DewPoint(Temperature temperature, byte humidity, VapAlgorithm algorithm = DefaultVapAlgorithm)
         {
-            double lnVapor = Math.Log(ActualVaporPressure(temperature, humidity, algorithm));
+            double vaporPressure = ActualVaporPressure(temperature, humidity, algorithm);
+            if (vaporPressure <= 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(humidity), humidity, "Vapor pressure is non-positive; dew point is undefined when humidity is 0.");
+            }
+
+            double lnVapor = Math.Log(vaporPressure);
 
             switch (algorithm)
             {

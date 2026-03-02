@@ -78,8 +78,8 @@ public class DavisVantageProConsoleRecordTests
         // Compute and set the CRC
         using (var crc16 = new Crc16())
         {
-            ushort crcValue = BitConverter.ToUInt16(crc16.ComputeHash(data, 0, 97), 0);
-            BitConverter.GetBytes(crcValue).CopyTo(data, 97);
+            byte[] crcBytes = crc16.ComputeHash(data, 0, 97);
+            crcBytes.CopyTo(data, 97);
         }
 
         return data;
@@ -130,8 +130,8 @@ public class DavisVantageProConsoleRecordTests
         // Recompute CRC
         using (var crc16 = new Crc16())
         {
-            ushort crcValue = BitConverter.ToUInt16(crc16.ComputeHash(data, 0, 97), 0);
-            BitConverter.GetBytes(crcValue).CopyTo(data, 97);
+            byte[] crcBytes = crc16.ComputeHash(data, 0, 97);
+            crcBytes.CopyTo(data, 97);
         }
 
         var record = DavisVantageProConsoleRecord.Create(data, DateTimeOffset.Now);
@@ -176,8 +176,8 @@ public class DavisVantageProConsoleRecordTests
         // Recompute CRC
         using (var crc16 = new Crc16())
         {
-            ushort crcValue = BitConverter.ToUInt16(crc16.ComputeHash(data, 0, 97), 0);
-            BitConverter.GetBytes(crcValue).CopyTo(data, 97);
+            byte[] crcBytes = crc16.ComputeHash(data, 0, 97);
+            crcBytes.CopyTo(data, 97);
         }
 
         Assert.ThrowsException<ArgumentException>(() =>

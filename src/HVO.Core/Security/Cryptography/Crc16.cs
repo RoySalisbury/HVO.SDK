@@ -21,7 +21,7 @@ namespace HVO.Core.Security.Cryptography
     /// using (var crc16 = new Crc16())
     /// {
     ///     byte[] hash = crc16.ComputeHash(data, 0, data.Length);
-    ///     ushort crcValue = BitConverter.ToUInt16(hash, 0);
+    ///     ushort crcValue = (ushort)((hash[0] &lt;&lt; 8) | hash[1]);
     /// }
     /// </code>
     /// </example>

@@ -15,7 +15,7 @@ namespace HVO.Weather.DavisVantagePro
         public DavisVantageProConsoleRecordReceivedEventArgs(DateTimeOffset recordDateTime, byte[] consoleRecord)
         {
             RecordDateTime = recordDateTime;
-            ConsoleRecord = consoleRecord;
+            ConsoleRecord = (byte[])consoleRecord.Clone();
         }
 
         /// <summary>Gets the date and time the console record was received.</summary>

@@ -14,7 +14,7 @@ public class Crc16Tests
 
         // CRC-16 CCITT with seed=0 and empty input returns 0
         Assert.AreEqual(2, result.Length);
-        ushort value = BitConverter.ToUInt16(result, 0);
+        ushort value = (ushort)((result[0] << 8) | result[1]);
         Assert.AreEqual((ushort)0, value, "CRC of empty input with seed 0 should be 0");
     }
 
@@ -38,7 +38,7 @@ public class Crc16Tests
         byte[] input = { 0x41 }; // 'A'
         var result = crc.ComputeHash(input);
 
-        ushort value = BitConverter.ToUInt16(result, 0);
+        ushort value = (ushort)((result[0] << 8) | result[1]);
         Assert.AreNotEqual((ushort)0, value, "CRC of non-empty input should be non-zero");
     }
 
@@ -53,7 +53,7 @@ public class Crc16Tests
         byte[] ab = { 0x41, 0x42 };
         var resultDirect = crc2.ComputeHash(ab);
 
-        Assert.AreEqual(BitConverter.ToUInt16(resultDirect, 0), BitConverter.ToUInt16(resultSubset, 0),
+        Assert.AreEqual((ushort)((resultDirect[0] << 8) | resultDirect[1]), (ushort)((resultSubset[0] << 8) | resultSubset[1]),
             "Computing CRC on a subset should match direct computation on the same bytes");
     }
 

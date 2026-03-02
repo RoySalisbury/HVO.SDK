@@ -90,6 +90,14 @@ public class WxUtilsTests
         Assert.IsTrue(result.Celsius < 20.0, "Dew point at 30% humidity should be below air temp");
     }
 
+    [TestMethod]
+    public void DewPoint_ZeroHumidity_ThrowsArgumentOutOfRangeException()
+    {
+        var temp = Temperature.FromCelsius(20.0);
+
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => WxUtils.DewPoint(temp, 0));
+    }
+
     #endregion
 
     #region Vapor Pressure
