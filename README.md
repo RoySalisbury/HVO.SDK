@@ -155,6 +155,17 @@ dotnet build
 dotnet test
 ```
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | PR workflow, coding standards, branch naming |
+| [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for PR workflow, coding standards, and how to run tests locally.
+
 ## License
 
 MIT
