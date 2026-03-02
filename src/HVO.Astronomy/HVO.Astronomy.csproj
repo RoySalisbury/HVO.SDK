@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>HVO.Astronomy</PackageId>
     <Version>1.0.0</Version>
-    <Description>Astronomy calculations for HVO projects — solar/lunar position, sunrise/sunset, twilight, moon phase, planetary ephemeris, coordinate transforms, and image projections.</Description>
+    <Description>Astronomy calculations for HVO projects — solar/lunar position, sunrise/sunset, twilight, moon phase, planetary ephemeris, and coordinate transforms.</Description>
     <PackageTags>hvo;astronomy;sun;moon;planets;ephemeris;sunrise;sunset;twilight;coordinates;projection</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <RootNamespace>HVO.Astronomy</RootNamespace>

@@ -15,10 +15,6 @@ namespace HVO.Astronomy
         /// <param name="minutes">Arc-minutes (0–59).</param>
         /// <param name="seconds">Arc-seconds (0–59.999…).</param>
         /// <param name="hemisphere">East or west hemisphere.</param>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when <paramref name="hemisphere"/> is not <see cref="LongitudeHemisphere.East"/>
-        /// or <see cref="LongitudeHemisphere.West"/>.
-        /// </exception>
         public Longitude(int degrees, int minutes, double seconds, LongitudeHemisphere hemisphere)
         {
             Degrees = Math.Abs(degrees);

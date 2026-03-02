@@ -25,9 +25,6 @@ namespace HVO.Astronomy
         /// <returns>Moon distance in Earth radii.</returns>
         public static double CalculateMoonAltitudeAzimuth(double dayNumber, double siteLatitude, double siteLongitude, out double altitude, out double azimuth)
         {
-            double sunLongitude;
-            SunCalculations.SunPosition(dayNumber, out sunLongitude);
-
             double moonRightAscension, moonDeclination;
             double moonDistance = CalculateMoonRightAscensionDeclination(dayNumber, out moonRightAscension, out moonDeclination);
 

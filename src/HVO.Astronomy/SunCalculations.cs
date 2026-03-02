@@ -52,7 +52,7 @@ namespace HVO.Astronomy
             y = y * Math.Cos(AstronomyMath.DegreesToRadians(eclipticObliquity));
 
             // Convert to spherical coordinates
-            rightAscension = AstronomyMath.RadiansToDegrees(Math.Atan2(y, x));
+            rightAscension = AstronomyMath.NormalizeDegrees(AstronomyMath.RadiansToDegrees(Math.Atan2(y, x)));
             declination = AstronomyMath.RadiansToDegrees(Math.Atan2(z, Math.Sqrt(x * x + y * y)));
 
             return distance;
@@ -254,8 +254,8 @@ namespace HVO.Astronomy
             }
 
             double diurnalArc = (Math.Sin(AstronomyMath.DegreesToRadians(horizonAltitude))
-                - Math.Sin(AstronomyMath.DegreesToRadians(siteLatitude)) * Math.Sin(AstronomyMath.DegreesToRadians(sinSunDeclination)))
-                / (Math.Cos(AstronomyMath.DegreesToRadians(siteLatitude)) * Math.Cos(AstronomyMath.DegreesToRadians(cosSunDeclination)));
+                - Math.Sin(AstronomyMath.DegreesToRadians(siteLatitude)) * sinSunDeclination)
+                / (Math.Cos(AstronomyMath.DegreesToRadians(siteLatitude)) * cosSunDeclination);
 
             if (diurnalArc >= 1.0)
             {
