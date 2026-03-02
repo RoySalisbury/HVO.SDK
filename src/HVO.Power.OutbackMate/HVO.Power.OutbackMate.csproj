@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>HVO.Power.OutbackMate</PackageId>
+    <Version>1.0.0</Version>
+    <Description>Outback Power Mate serial protocol parser — supports both Mate1 and Mate2 protocols for charge controllers, inverter/chargers, and FlexNet DC battery monitors.</Description>
+    <PackageTags>hvo;power;outback;mate;solar;inverter;chargecontroller;flexnet;offgrid</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <RootNamespace>HVO.Power.OutbackMate</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HVO.Core\HVO.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
