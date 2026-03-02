@@ -1,6 +1,6 @@
 # HVO Workspace Repository Map
 
-> Last updated: 2026-03-04
+> Last updated: 2026-07-16
 
 This document catalogs all repositories in the HVO multi-repo workspace, their purpose, projects, and how domain logic maps across them. It serves as the single reference for understanding where code lives and where it should go.
 
@@ -41,9 +41,11 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 |---------|-----|---------|-------------|
 | `HVO.Core` | ns2.0 | 1.1.0 | Result\<T\>, Option\<T\>, OneOf, Guard, Ensure, extensions |
 | `HVO.Core.SourceGenerators` | ns2.0 | 1.1.0 | Roslyn source generators (`[NamedOneOf]`) |
-| `HVO.Iot.Devices` | net8.0 | 1.1.0 | GPIO/I2C abstractions, limit switches, relay hats, buttons |
+| `HVO.Iot.Devices` | net8.0 | 1.2.0 | GPIO/I2C abstractions, limit switches, relay hats, buttons, I2C sensors |
 | `HVO.ZWOOptical.ASISDK` | ns2.0 | 0.0.4 | ZWO ASI camera SDK P/Invoke wrapper |
 | `HVO.Astronomy` | ns2.0 | 1.0.0 | Sun/Moon/planet positions, sunrise/sunset, twilight, moon phase, Lat/Lon types, coordinate transforms |
+| `HVO.Weather` | ns2.0 | 1.0.0 | Davis VP binary protocol, WeatherLink TCP, barometric algorithms, temperature/pressure unit conversions, CRC-16 |
+| `HVO.Power` | ns2.0 | 1.0.0 | Outback Mate 2 serial parser, charge controller/FlexNet/inverter records, Digital Loggers Web Power Switch |
 | `HVO.Astronomy.CFITSIO` | net10.0 | 1.0.4 | FITS file I/O via cfitsio native library |
 | `HVO.Astronomy.CFITSIO.NativeAssets` | net10.0 | 1.0.4 | Native cfitsio binaries (linux-arm64) |
 
@@ -54,6 +56,9 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 - `FourRelayFourInputHat` — Sequent Microsystems 4-relay/4-input RPi HAT
 - `WatchdogBatteryHat` — Sequent Microsystems watchdog timer HAT
 - `GpioControllerClient` / `MemoryGpioControllerClient` — GPIO abstractions for testing
+- `Mlx90614` — MLX90614 non-contact IR temperature sensor (ambient + object temps)
+- `Si1145` — SI1145 UV/visible/IR/proximity sensor with auto-measurement
+- `Tsl2591` — TSL2591 high-dynamic-range light sensor with auto-gain-ranging
 
 ### HVO.SkyMonitor
 
@@ -230,12 +235,12 @@ Where observatory domain knowledge currently lives and where it should go:
 
 | Capability | Legacy Source | Current Home | Canonical Target |
 |-----------|-------------|-------------|-----------------|
-| Davis VP binary protocol parser | HVOv6 `HVO/Weather/DavisVantagePro/` | — | **HVO.SDK** `HVO.Weather` (new) |
-| WeatherLink IP TCP client | HVOv6 `HVO/Weather/DavisVantagePro/` | — | **HVO.SDK** `HVO.Weather` (new) |
-| Temperature unit conversions | HVOv6 `HVO/Weather/Temperature.cs` | — | **HVO.SDK** `HVO.Weather` (new) |
-| Barometric pressure conversions | HVOv6 `HVO/Weather/BarometricPressure.cs` | — | **HVO.SDK** `HVO.Weather` (new) |
-| Meteorological algorithms (8+) | HVOv6 `HVO/Weather/WxUtils.cs` | — | **HVO.SDK** `HVO.Weather` (new) |
-| CRC-16 CCITT | HVOv6 `HVO/Security/Cryptography/Crc16.cs` | — | **HVO.SDK** `HVO.Weather` (new) |
+| Davis VP binary protocol parser | HVOv6 `HVO/Weather/DavisVantagePro/` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
+| WeatherLink IP TCP client | HVOv6 `HVO/Weather/DavisVantagePro/` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
+| Temperature unit conversions | HVOv6 `HVO/Weather/Temperature.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
+| Barometric pressure conversions | HVOv6 `HVO/Weather/BarometricPressure.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
+| Meteorological algorithms (8+) | HVOv6 `HVO/Weather/WxUtils.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
+| CRC-16 CCITT | HVOv6 `HVO/Security/Cryptography/Crc16.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
 | CWOP/APRS formatting | HVOv6 Azure Function `CitizensWeather` | — | Stays in function / agent |
 | Weather Underground posting | HVOv6 Azure Function `WeatherUnderground` | — | Stays in function / agent |
 
@@ -243,11 +248,11 @@ Where observatory domain knowledge currently lives and where it should go:
 
 | Capability | Legacy Source | Current Home | Canonical Target |
 |-----------|-------------|-------------|-----------------|
-| Outback Mate 2 serial parser | HVOv6 `HVO/Power/OutbackPowerSystems/` | — | **HVO.SDK** `HVO.Power` (new) |
-| Charge controller records | HVOv6 `HVO/Power/OutbackPowerSystems/` | — | **HVO.SDK** `HVO.Power` (new) |
-| FlexNet DC records | HVOv6 `HVO/Power/OutbackPowerSystems/` | — | **HVO.SDK** `HVO.Power` (new) |
-| Inverter/charger records | HVOv6 `HVO/Power/OutbackPowerSystems/` | — | **HVO.SDK** `HVO.Power` (new) |
-| Web Power Switch HTTP control | HVOv6 `HVO/Power/DigitalLoggers/` | — | **HVO.SDK** `HVO.Power` (new) |
+| Outback Mate 2 serial parser | HVOv6 `HVO/Power/OutbackPowerSystems/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
+| Charge controller records | HVOv6 `HVO/Power/OutbackPowerSystems/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
+| FlexNet DC records | HVOv6 `HVO/Power/OutbackPowerSystems/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
+| Inverter/charger records | HVOv6 `HVO/Power/OutbackPowerSystems/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
+| Web Power Switch HTTP control | HVOv6 `HVO/Power/DigitalLoggers/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
 
 ### IoT / Hardware
 
@@ -256,10 +261,10 @@ Where observatory domain knowledge currently lives and where it should go:
 | GPIO abstractions / limit switches | — | **HVO.SDK** `HVO.Iot.Devices` 1.1.0 | ✅ Done |
 | Relay HATs (Sequent) | — | **HVO.SDK** `HVO.Iot.Devices` 1.1.0 | ✅ Done |
 | Watchdog HAT (Sequent) | — | **HVO.SDK** `HVO.Iot.Devices` 1.1.0 | ✅ Done |
-| MLX90614 (IR sky temp) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
-| TSL2591 (luminosity) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
+| MLX90614 (IR sky temp) | HVOv6 `HualapaiValleyObservatory.IoT/` + nF.Devices | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
+| TSL2591 (luminosity) | HVOv6 `HualapaiValleyObservatory.IoT/` + nF.Devices | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
+| SI1145 (UV/visible/IR) | HVOv6 `HualapaiValleyObservatory.IoT/` + nF.Devices | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
 | HTU21DF (humidity/temp) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
-| SI1145 (UV/visible/IR) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
 | DS3231M (RTC) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
 | MCP23008/23017 (GPIO expander) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
 | ZWO ASI camera SDK | — | **HVO.SDK** `HVO.ZWOOptical.ASISDK` 0.0.4 | ✅ Done |
@@ -298,9 +303,9 @@ Track what has been migrated from legacy repos to SDK/active repos.
 | Domain | Source | Target | Status | Notes |
 |--------|--------|--------|--------|-------|
 | Astronomy calculations | HVOv6 `HVO/Astronomy/` + HVOv9-SkyMonitorv6 `Imaging/Planets/` | HVO.SDK `HVO.Astronomy` | ✅ Done | Sun, Moon, planets, twilight, Lat/Lon, J2000. 3 bugs fixed: Crescent spelling, Longitude always-West, DivideByZero. 93 unit tests. |
-| Weather protocols | HVOv6 `HVO/Weather/` | HVO.SDK `HVO.Weather` | ⬜ Not started | Davis VP parser, unit conversions, met algorithms |
-| Power systems | HVOv6 `HVO/Power/` | HVO.SDK `HVO.Power` | ⬜ Not started | Outback Mate parser, Web Power Switch |
-| I2C sensor drivers | HVOv6 `HualapaiValleyObservatory.IoT/` | HVO.SDK `HVO.Iot.Devices` | ⬜ Not started | MLX90614, TSL2591, HTU21DF, SI1145 |
+| Weather protocols | HVOv6 `HVO/Weather/` | HVO.SDK `HVO.Weather` | ✅ Done | Davis VP binary parser, WeatherLink TCP, 8+ met algorithms, CRC-16, unit conversions. PR #27. |
+| Power systems | HVOv6 `HVO/Power/` | HVO.SDK `HVO.Power` | ✅ Done | Outback Mate 2 serial parser, Web Power Switch HTTP control, 7 enum types. PR #28. |
+| I2C sensor drivers | HVOv6 IoT + nF.Devices | HVO.SDK `HVO.Iot.Devices` | 🚧 In progress | MLX90614, SI1145, TSL2591 done. HTU21DF, DS3231M, MCP23008/23017 remaining. |
 | Star catalogs | HVOv9-SkyMonitorv6 `Imaging/Catalogs/` | HVO.SDK `HVO.Astronomy` | ⬜ Not started | HYG, deep-sky, constellations |
 | Star field rendering | HVOv9-SkyMonitorv6 `Imaging/Rendering/` | HVO.SkyMonitor | ⬜ Not started | Projectors, star color map (imaging, not astronomy) |
 | FITS file I/O | — | HVO.SDK `HVO.Astronomy.CFITSIO` | ✅ Done | v1.0.4 published |
