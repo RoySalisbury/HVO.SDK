@@ -13,6 +13,7 @@ on:
         options:
           - HVO.Core
           - HVO.Core.SourceGenerators
+          - HVO.Iot.Devices
       target:
         description: 'Publish target'
         required: true
