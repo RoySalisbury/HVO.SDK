@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using HVO.Core.Extensions;
 using HvoCollectionExtensions = HVO.Core.Extensions.CollectionExtensions;
@@ -277,5 +278,22 @@ public class EnumExtensionsTests
         var description = EnumExtensions.GetDescription(value!);
 
         Assert.AreEqual(string.Empty, description);
+    }
+
+    [TestMethod]
+    public void GetEnumAttribute_ReturnsAttributeWhenPresent()
+    {
+        var attribute = TestEnum.First.GetEnumAttribute<TestEnum, DescriptionAttribute>();
+
+        Assert.IsNotNull(attribute);
+        Assert.AreEqual("First Value", attribute!.Description);
+    }
+
+    [TestMethod]
+    public void GetEnumAttribute_ReturnsNullWhenMissing()
+    {
+        var attribute = TestEnum.Second.GetEnumAttribute<TestEnum, DescriptionAttribute>();
+
+        Assert.IsNull(attribute);
     }
 }

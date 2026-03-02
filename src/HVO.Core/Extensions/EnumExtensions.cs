@@ -34,4 +34,22 @@ public static class EnumExtensions
             return attributes.Length > 0 ? attributes[0].Description : v.ToString();
         });
     }
+
+    /// <summary>
+    /// Retrieves a specific attribute applied to an enum value.
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type.</typeparam>
+    /// <typeparam name="TAttribute">The attribute type to fetch.</typeparam>
+    /// <param name="value">The enum value being inspected.</param>
+    /// <returns>The attribute instance if found; otherwise <c>null</c>.</returns>
+    public static TAttribute? GetEnumAttribute<TEnum, TAttribute>(this TEnum value)
+        where TEnum : struct, Enum
+        where TAttribute : Attribute
+    {
+        var members = typeof(TEnum).GetMember(value.ToString());
+        if (members.Length == 0)
+            return null;
+
+        return members[0].GetCustomAttribute<TAttribute>();
+    }
 }
