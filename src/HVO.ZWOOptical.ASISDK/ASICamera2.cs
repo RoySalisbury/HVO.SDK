@@ -11,6 +11,12 @@ namespace HVO.ZWOOptical.ASISDK
     {
         private const string ASILIBRARY = "ASICamera2";
 
+        /// <summary>
+        /// Polyfill for Math.Clamp (not available in .NET Standard 2.0).
+        /// </summary>
+        private static long Clamp(long value, long min, long max)
+            => value < min ? min : (value > max ? max : value);
+
         // Determines if the native SDK uses 64-bit C 'long' (Linux/macOS) vs 32-bit (Windows)
         public static bool Use64Structs { get; } =
             System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
@@ -52,8 +58,8 @@ namespace HVO.ZWOOptical.ASISDK
             var cam32 = new ASI_CAMERA_INFO_32
             {
                 CameraID = cam64.CameraID,
-                MaxHeight = (int)Math.Clamp(cam64.MaxHeight, int.MinValue, int.MaxValue),
-                MaxWidth = (int)Math.Clamp(cam64.MaxWidth, int.MinValue, int.MaxValue),
+                MaxHeight = (int)Clamp(cam64.MaxHeight, int.MinValue, int.MaxValue),
+                MaxWidth = (int)Clamp(cam64.MaxWidth, int.MinValue, int.MaxValue),
                 IsColorCam = cam64.IsColorCam,
                 BayerPattern = cam64.BayerPattern,
                 SupportedBins = cam64.SupportedBins,
@@ -243,9 +249,9 @@ namespace HVO.ZWOOptical.ASISDK
             // Down-convert long fields to int with clamping (most control ranges fit in int)
             var result = new ASI_CONTROL_CAPS_32
             {
-                MaxValue = (int)Math.Clamp(caps64.MaxValue, int.MinValue, int.MaxValue),
-                MinValue = (int)Math.Clamp(caps64.MinValue, int.MinValue, int.MaxValue),
-                DefaultValue = (int)Math.Clamp(caps64.DefaultValue, int.MinValue, int.MaxValue),
+                MaxValue = (int)Clamp(caps64.MaxValue, int.MinValue, int.MaxValue),
+                MinValue = (int)Clamp(caps64.MinValue, int.MinValue, int.MaxValue),
+                DefaultValue = (int)Clamp(caps64.DefaultValue, int.MinValue, int.MaxValue),
                 IsAutoSupported = caps64.IsAutoSupported,
                 IsWritable = caps64.IsWritable,
                 ControlType = caps64.ControlType,
@@ -282,7 +288,7 @@ namespace HVO.ZWOOptical.ASISDK
                 return GetControlValue32(cameraId, controlType, out isAuto);
             }
             var v64 = GetControlValue64(cameraId, controlType, out isAuto);
-            return (int)Math.Clamp(v64, int.MinValue, int.MaxValue);
+            return (int)Clamp(v64, int.MinValue, int.MaxValue);
         }
 
         public static void SetControlValueCompat(int cameraId, ASI_CONTROL_TYPE controlType, int value, bool auto)
@@ -531,8 +537,8 @@ namespace HVO.ZWOOptical.ASISDK
             var converted = new ASI_CAMERA_INFO_32
             {
                 CameraID = info64.CameraID,
-                MaxHeight = (int)Math.Clamp(info64.MaxHeight, int.MinValue, int.MaxValue),
-                MaxWidth = (int)Math.Clamp(info64.MaxWidth, int.MinValue, int.MaxValue),
+                MaxHeight = (int)Clamp(info64.MaxHeight, int.MinValue, int.MaxValue),
+                MaxWidth = (int)Clamp(info64.MaxWidth, int.MinValue, int.MaxValue),
                 IsColorCam = info64.IsColorCam,
                 BayerPattern = info64.BayerPattern,
                 SupportedBins = info64.SupportedBins,

@@ -4,6 +4,15 @@ All notable changes documented here. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-02
+
+### Changed
+
+- **HVO.ZWOOptical.ASISDK 0.0.4** — Retargeted from netstandard2.1 to **netstandard2.0** for maximum compatibility (including .NET Framework 4.8.1). Added `Math.Clamp` polyfill.
+- **HVO.Astronomy.CFITSIO 1.0.4** — Retargeted from net9.0 to **net10.0** to leverage latest `[LibraryImport]` source-generated P/Invoke improvements
+- **HVO.Astronomy.CFITSIO.NativeAssets 1.0.4** — Retargeted from net9.0 to **net10.0** (aligned with CFITSIO)
+- **HVO.Iot.Devices 1.1.0** — Retargeted from net9.0 to **net8.0** (minimum required by `System.Device.Gpio`/`Iot.Device.Bindings` packages). Updated `System.Device.Gpio` and `Iot.Device.Bindings` from 4.0.1 to 4.1.0.
+
 ## [1.1.0] - 2026-03-02
 
 ### Added
