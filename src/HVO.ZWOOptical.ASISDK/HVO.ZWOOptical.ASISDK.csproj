@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <SignAssembly>false</SignAssembly>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <RootNamespace>HVO.ZWOOptical.ASISDK</RootNamespace>
+    <AssemblyName>HVO.ZWOOptical.ASISDK</AssemblyName>
+    <PackageId>HVO.ZWOOptical.ASISDK</PackageId>
+    <Version>0.0.3</Version>
+    <Description>ZWO ASI Camera SDK P/Invoke wrapper for .NET (macOS/Linux, multi-RID).</Description>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>license.txt</PackageLicenseFile>
+    <PackageTags>Astronomy,ZWO,ASI</PackageTags>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" PackagePath="./" Pack="True" />
+    <None Include="runtimes/license.txt" PackagePath="" Pack="True" />
+    <None Include="runtimes/asi.rules" PackagePath="runtimes" Pack="True" />
+    <None Include="runtimes/armv7/libASICamera2.so" PackagePath="runtimes/linux-arm/native" Pack="True" />
+    <None Include="runtimes/armv8/libASICamera2.so" PackagePath="runtimes/linux-arm64/native" Pack="True" />
+    <None Include="runtimes/mac/libASICamera2.dylib" PackagePath="runtimes/osx-arm64/native" Pack="True" />
+  </ItemGroup>
+
+</Project>

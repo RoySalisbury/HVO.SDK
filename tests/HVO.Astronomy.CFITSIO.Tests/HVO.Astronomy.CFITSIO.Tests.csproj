@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
+    <DefineConstants>HAS_SKIA</DefineConstants>
+    <NoWarn>$(NoWarn);CS1030</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageReference Include="MSTest" Version="4.0.1" />
+    <PackageReference Include="FluentAssertions" Version="8.7.1" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HVO.Astronomy.CFITSIO\HVO.Astronomy.CFITSIO.csproj" />
+    <ProjectReference Include="..\..\src\HVO.Core\HVO.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Copy native CFITSIO libraries from the referenced project to enable tests -->
+  <Target Name="CopyNativeAssets" AfterTargets="Build">
+    <ItemGroup>
+      <NativeLibs Include="..\..\src\HVO.Astronomy.CFITSIO\runtimes\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeLibs)" 
+          DestinationFiles="@(NativeLibs->'$(OutDir)runtimes\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+</Project>

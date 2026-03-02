@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SignAssembly>false</SignAssembly>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RootNamespace>HVO.Astronomy.CFITSIO</RootNamespace>
+    <AssemblyName>HVO.Astronomy.CFITSIO</AssemblyName>
+    <PackageId>HVO.Astronomy.CFITSIO</PackageId>
+    <Version>1.0.3</Version>
+    <Description>CFITSIO native binaries for P/Invoke (macOS/Linux/Windows, multi-RID).</Description>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <PackageTags>Astronomy,FITS</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>HAS_SKIA</DefineConstants>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <NoWarn>$(NoWarn);CS1591;CS1572</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../HVO.Astronomy.CFITSIO.NativeAssets/HVO.Astronomy.CFITSIO.NativeAssets.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../HVO.Core/HVO.Core.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="BUILD-FEATURES.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
