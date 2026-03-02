@@ -1,9 +1,9 @@
 using System;
-using System.ComponentModel;
 using System.Linq;
 using HVO.Core.Extensions;
 using HvoCollectionExtensions = HVO.Core.Extensions.CollectionExtensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace HVO.Core.Tests.Extensions;
 
