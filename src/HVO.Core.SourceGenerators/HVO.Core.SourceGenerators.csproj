@@ -17,6 +17,9 @@
 
     <!-- Source generators cannot generate doc XML -->
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- NU5128: expected for source generators (assembly in analyzers/, not lib/) -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
