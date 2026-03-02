@@ -10,13 +10,17 @@ namespace HVO.Power.OutbackMate
         /// <summary>
         /// Initializes a new instance of the <see cref="OutbackMateCommunicationsErrorEventArgs"/> class.
         /// </summary>
-        /// <param name="exception">The exception that caused the communications error.</param>
-        public OutbackMateCommunicationsErrorEventArgs(Exception exception)
+        /// <param name="exception">
+        /// The exception that caused the communications error, or <c>null</c> if no exception is available.
+        /// </param>
+        public OutbackMateCommunicationsErrorEventArgs(Exception? exception)
         {
             Exception = exception;
         }
 
-        /// <summary>Gets the exception that caused the communications error.</summary>
-        public Exception Exception { get; }
+        /// <summary>
+        /// Gets the exception that caused the communications error, or <c>null</c> if no exception is available.
+        /// </summary>
+        public Exception? Exception { get; }
     }
 }

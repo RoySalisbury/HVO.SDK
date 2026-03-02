@@ -84,7 +84,8 @@ namespace HVO.Power.OutbackMate
             _serialPort = new SerialPort(_portName, 19200, Parity.None, 8, StopBits.One)
             {
                 DtrEnable = true,
-                RtsEnable = false
+                RtsEnable = false,
+                ReadTimeout = 2000
             };
 
             _serialPort.Open();
@@ -108,23 +109,24 @@ namespace HVO.Power.OutbackMate
             {
                 _readCts.Cancel();
 
+                // Close the serial port first so any blocking ReadLine() call
+                // is unblocked immediately, rather than waiting for the timeout.
+                CloseSerialPort();
+
                 if (_readTask != null)
                 {
                     // Wait for the read loop to exit, with a timeout.
-                    Task completed = await Task.WhenAny(_readTask, Task.Delay(timeoutMs)).ConfigureAwait(false);
-                    if (completed != _readTask)
-                    {
-                        // The read loop did not exit within the timeout.
-                        // The serial port close below should unblock any pending ReadLine.
-                    }
+                    await Task.WhenAny(_readTask, Task.Delay(timeoutMs)).ConfigureAwait(false);
                 }
 
                 _readCts.Dispose();
                 _readCts = null;
                 _readTask = null;
             }
-
-            CloseSerialPort();
+            else
+            {
+                CloseSerialPort();
+            }
         }
 
         /// <inheritdoc />
@@ -163,12 +165,18 @@ namespace HVO.Power.OutbackMate
                 catch (IOException ex)
                 {
                     // Usually caused because the port was closed externally.
+                    // If cancellation or disposal is in progress, treat this as normal shutdown.
+                    if (cancellationToken.IsCancellationRequested || _disposed || _serialPort == null || !_serialPort.IsOpen)
+                    {
+                        break;
+                    }
+
                     OnCommunicationsError(ex);
                     fatalError = true;
                 }
                 catch (TimeoutException)
                 {
-                    // Read timed out — continue reading.
+                    // Read timed out due to ReadTimeout — check cancellation and continue.
                 }
                 catch (OperationCanceledException)
                 {
