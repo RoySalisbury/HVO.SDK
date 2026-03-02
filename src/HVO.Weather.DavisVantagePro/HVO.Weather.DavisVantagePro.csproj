@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>HVO.Weather.DavisVantagePro</PackageId>
+    <Version>1.0.0</Version>
+    <Description>Davis Vantage Pro weather station integration — LOOP packet parser, TCP client, and hardware-specific enumerations.</Description>
+    <PackageTags>hvo;weather;davis;vantagepro;weatherlink;tcp;meteorology</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <RootNamespace>HVO.Weather.DavisVantagePro</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HVO.Core\HVO.Core.csproj" />
+    <ProjectReference Include="..\HVO.Weather\HVO.Weather.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
