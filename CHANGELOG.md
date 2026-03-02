@@ -4,14 +4,21 @@ All notable changes documented here. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-02
+
 ### Added
 
-- HVO.Iot.Devices library (GPIO, I2C device abstractions)
-- HVO.Astronomy.CFITSIO (FITS file I/O wrapper)
-- HVO.Astronomy.CFITSIO.NativeAssets (native library package)
-- HVO.ZWOOptical.ASISDK (ZWO camera SDK wrapper)
-- AstronomyMath utilities in HVO.Core
+- **HVO.Core 1.1.0** — AstronomyMath utilities, additional extensions
+- **HVO.Core.SourceGenerators 1.1.0** — updated alongside HVO.Core
+- **HVO.Iot.Devices 1.0.0** — GPIO, I2C device abstractions for Raspberry Pi and Sequent Microsystems HATs (initial NuGet release)
+- **HVO.Astronomy.CFITSIO 1.0.3** — FITS file I/O wrapper with SkiaSharp integration (initial NuGet release)
+- **HVO.Astronomy.CFITSIO.NativeAssets 1.0.3** — native CFITSIO binaries for macOS/Linux/Windows (initial NuGet release)
+- **HVO.ZWOOptical.ASISDK 0.0.3** — ZWO ASI Camera SDK P/Invoke wrapper (initial NuGet release)
 - Repository documentation standardization
+
+### Changed
+
+- All packages now published to nuget.org (eliminating LocalPackages dependency in consuming repos)
 
 ## [1.0.0] - 2025-02-01
 
