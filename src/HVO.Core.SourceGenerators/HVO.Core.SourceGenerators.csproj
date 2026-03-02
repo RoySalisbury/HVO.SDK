@@ -20,7 +20,8 @@
     <!-- Source generators cannot generate doc XML -->
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
 
-    <!-- NU5128: expected for source generators (assembly in analyzers/, not lib/) -->
+    <!-- Source generators have no PDB for symbol packages; NU5128 expected (analyzers/ not lib/) -->
+    <IncludeSymbols>false</IncludeSymbols>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
