@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>10.0</LangVersion>
     <SignAssembly>false</SignAssembly>
     <IsPackable>true</IsPackable>
@@ -11,7 +11,7 @@
     <RootNamespace>HVO.ZWOOptical.ASISDK</RootNamespace>
     <AssemblyName>HVO.ZWOOptical.ASISDK</AssemblyName>
     <PackageId>HVO.ZWOOptical.ASISDK</PackageId>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Description>ZWO ASI Camera SDK P/Invoke wrapper for .NET (macOS/Linux, multi-RID).</Description>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
