@@ -1,5 +1,14 @@
 # HVO.SDK
 
+[![CI](https://github.com/RoySalisbury/HVO.SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/RoySalisbury/HVO.SDK/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/HVO.Core)](https://www.nuget.org/packages/HVO.Core)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/HVO.Core)](https://www.nuget.org/packages/HVO.Core)
+[![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/RoySalisbury/15a5e41c02e71169bd342c22576e2646/raw/hvo-sdk-tests.json)](https://github.com/RoySalisbury/HVO.SDK/actions/workflows/ci.yml)
+[![Line Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/RoySalisbury/15a5e41c02e71169bd342c22576e2646/raw/hvo-sdk-coverage-line.json)](https://github.com/RoySalisbury/HVO.SDK/actions/workflows/ci.yml)
+[![Branch Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/RoySalisbury/15a5e41c02e71169bd342c22576e2646/raw/hvo-sdk-coverage-branch.json)](https://github.com/RoySalisbury/HVO.SDK/actions/workflows/ci.yml)
+[![.NET Standard](https://img.shields.io/badge/.NET%20Standard-2.0-blue)](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 Shared .NET utilities and functional patterns used across all HVO projects.
 
 ## Packages
