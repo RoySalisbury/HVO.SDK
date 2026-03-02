@@ -6,6 +6,13 @@ namespace HVO.Core.Astronomy;
 /// <summary>
 /// Provides shared astronomical utility calculations used across sky-monitoring applications.
 /// </summary>
+/// <remarks>
+/// <para>
+/// <strong>Deprecated.</strong> Use <c>HVO.Astronomy.AstronomyMath</c> from the
+/// <c>HVO.Astronomy</c> NuGet package instead. This class will be removed in a future release.
+/// </para>
+/// </remarks>
+[Obsolete("Use HVO.Astronomy.AstronomyMath from the HVO.Astronomy NuGet package. This class will be removed in a future release.")]
 public static class AstronomyMath
 {
     /// <summary>
