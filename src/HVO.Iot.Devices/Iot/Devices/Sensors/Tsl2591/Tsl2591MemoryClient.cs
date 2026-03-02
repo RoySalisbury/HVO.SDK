@@ -1,4 +1,3 @@
-using System;
 using HVO.Iot.Devices.Implementation;
 
 namespace HVO.Iot.Devices.Iot.Devices.Sensors.Tsl2591;
@@ -23,8 +22,6 @@ public class Tsl2591MemoryClient : MemoryI2cRegisterClient
     // Register addresses as the driver sees them (with command bits)
     private const byte IdRegister = 0x80 | 0x20 | 0x12;        // 0xB2
     private const byte Channel0DataLow = 0x80 | 0x20 | 0x14;   // 0xB4
-    private const byte ControlRegister = 0x80 | 0x20 | 0x01;   // 0xA1
-    private const byte EnableRegister = 0x80 | 0x20 | 0x00;    // 0xA0
 
     /// <summary>
     /// Initializes a new memory-backed TSL2591 client with the device ID pre-loaded.

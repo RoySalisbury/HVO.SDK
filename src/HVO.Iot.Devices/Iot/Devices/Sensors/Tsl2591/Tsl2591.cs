@@ -276,7 +276,12 @@ public class Tsl2591 : RegisterBasedI2cDevice, ITsl2591
 
                     var fullSpectrum = (ushort)((buffer[1] << 8) | buffer[0]);
                     var ir = (ushort)((buffer[3] << 8) | buffer[2]);
-                    var visible = (ushort)(fullSpectrum - ir);
+                    var visibleDiff = fullSpectrum - ir;
+                    if (visibleDiff < 0)
+                    {
+                        visibleDiff = 0;
+                    }
+                    var visible = (ushort)visibleDiff;
 
                     return (visible, ir);
                 }

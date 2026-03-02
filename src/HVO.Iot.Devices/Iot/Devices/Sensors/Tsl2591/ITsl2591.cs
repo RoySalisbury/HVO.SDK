@@ -43,12 +43,20 @@ public enum Tsl2591IntegrationTime
 public readonly struct Tsl2591Luminosity
 {
     /// <summary>
-    /// Gets the visible light component (full spectrum minus IR), gain-normalized to 1× equivalent.
+    /// Gets the visible light component (full spectrum minus IR).
+    /// For readings produced by <see cref="ITsl2591.GetLuminosity(Tsl2591Gain, Tsl2591IntegrationTime)"/>,
+    /// this is the raw sensor value at the configured gain. For readings produced by
+    /// <see cref="ITsl2591.GetGainAdjustedLuminosity"/>, this value is gain-normalized to the
+    /// equivalent of 1× gain.
     /// </summary>
     public double Visible { get; init; }
 
     /// <summary>
-    /// Gets the infrared light component, gain-normalized to 1× equivalent.
+    /// Gets the infrared light component.
+    /// For readings produced by <see cref="ITsl2591.GetLuminosity(Tsl2591Gain, Tsl2591IntegrationTime)"/>,
+    /// this is the raw sensor value at the configured gain. For readings produced by
+    /// <see cref="ITsl2591.GetGainAdjustedLuminosity"/>, this value is gain-normalized to the
+    /// equivalent of 1× gain.
     /// </summary>
     public double IR { get; init; }
 

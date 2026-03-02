@@ -1,4 +1,3 @@
-using System;
 using HVO.Iot.Devices.Implementation;
 
 namespace HVO.Iot.Devices.Iot.Devices.Sensors.Si1145;
