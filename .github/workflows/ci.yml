@@ -347,9 +347,14 @@ jobs:
         if: always() && steps.projects.outputs.skip != 'true'
         id: coverage
         run: |
-          LINE_COV=$(grep 'Line coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
-          BRANCH_COV=$(grep 'Branch coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
-          METHOD_COV=$(grep 'Method coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
+          if [[ -f coverage-report/Summary.txt ]]; then
+            LINE_COV=$(grep 'Line coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
+            BRANCH_COV=$(grep 'Branch coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
+            METHOD_COV=$(grep 'Method coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
+          else
+            echo "No coverage report found — using defaults"
+            LINE_COV=0; BRANCH_COV=0; METHOD_COV=0
+          fi
           echo "line=$LINE_COV" >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH_COV" >> "$GITHUB_OUTPUT"
           echo "method=$METHOD_COV" >> "$GITHUB_OUTPUT"
@@ -375,15 +380,19 @@ jobs:
             echo "| Scope | Full — all projects |" >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f coverage-report/SummaryGithub.md ]]; then
+            cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Publish test results
         uses: dorny/test-reporter@v2
         if: always() && steps.projects.outputs.skip != 'true'
+        continue-on-error: true
         with:
           name: Test Results
           path: TestResults/test-results.trx
           reporter: dotnet-trx
+          fail-on-empty: false
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
