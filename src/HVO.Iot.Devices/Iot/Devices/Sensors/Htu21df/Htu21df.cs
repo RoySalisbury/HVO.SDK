@@ -107,7 +107,8 @@ public class Htu21df : RegisterBasedI2cDevice, IHtu21df
                 Span<byte> buffer = stackalloc byte[3];
                 ReadBlock(ReadTempCommand, buffer);
 
-                var raw = (buffer[0] << 8) | buffer[1];
+                // Mask out status bits (LSB bits 1:0) per datasheet
+                var raw = ((buffer[0] << 8) | buffer[1]) & 0xFFFC;
                 var celsius = ((raw / 65536.0) * 175.72) - 46.85;
 
                 _logger.LogTrace("Temperature: {Temperature:F2}°C (raw: 0x{Raw:X4})", celsius, raw);
@@ -133,7 +134,8 @@ public class Htu21df : RegisterBasedI2cDevice, IHtu21df
                 Span<byte> buffer = stackalloc byte[3];
                 ReadBlock(ReadHumidityCommand, buffer);
 
-                var raw = (buffer[0] << 8) | buffer[1];
+                // Mask out status bits (LSB bits 1:0) per datasheet
+                var raw = ((buffer[0] << 8) | buffer[1]) & 0xFFFC;
                 var humidity = ((raw / 65536.0) * 125.0) - 6.0;
 
                 _logger.LogTrace("Humidity: {Humidity:F2}% (raw: 0x{Raw:X4})", humidity, raw);

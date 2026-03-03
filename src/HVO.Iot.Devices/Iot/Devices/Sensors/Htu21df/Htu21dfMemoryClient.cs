@@ -45,6 +45,7 @@ public class Htu21dfMemoryClient : MemoryI2cRegisterClient
         // raw = (celsius + 46.85) / 175.72 * 65536.0
         var raw = (int)((celsius + 46.85) / 175.72 * 65536.0);
         raw = Math.Max(0, Math.Min(raw, 0xFFFF));
+        raw &= 0xFFFC; // Clear status bits (LSB bits 1:0) per datasheet
 
         _commandData[ReadTempCommand] = new byte[]
         {
@@ -64,6 +65,7 @@ public class Htu21dfMemoryClient : MemoryI2cRegisterClient
         // raw = (percent + 6.0) / 125.0 * 65536.0
         var raw = (int)((percent + 6.0) / 125.0 * 65536.0);
         raw = Math.Max(0, Math.Min(raw, 0xFFFF));
+        raw &= 0xFFFC; // Clear status bits (LSB bits 1:0) per datasheet
 
         _commandData[ReadHumidityCommand] = new byte[]
         {

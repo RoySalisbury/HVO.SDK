@@ -47,7 +47,7 @@ public class Ds3231mMemoryClient : MemoryI2cRegisterClient
         regs[TimeCalRegister + 0] = DecToBcd(utc.Second);
         regs[TimeCalRegister + 1] = DecToBcd(utc.Minute);
         regs[TimeCalRegister + 2] = DecToBcd(utc.Hour);
-        regs[TimeCalRegister + 3] = (byte)(((int)utc.DayOfWeek + 7) % 7);
+        regs[TimeCalRegister + 3] = (byte)((int)utc.DayOfWeek + 1);
         regs[TimeCalRegister + 4] = DecToBcd(utc.Day);
         regs[TimeCalRegister + 5] = utc.Year >= 2000
             ? (byte)(DecToBcd(utc.Month) | 0x80)
@@ -61,12 +61,25 @@ public class Ds3231mMemoryClient : MemoryI2cRegisterClient
     /// <param name="celsius">Temperature in degrees Celsius.</param>
     public void SetTemperature(double celsius)
     {
-        // MSB is signed integer part, upper 2 bits of LSB are fractional (0.25°C steps)
-        var integerPart = (int)Math.Floor(celsius);
-        var fractionalPart = (int)Math.Round((celsius - integerPart) / 0.25);
+        // Quantize to 0.25°C steps and encode as DS3231 signed fixed-point:
+        // MSB = signed integer part, upper 2 bits of LSB = fractional quarter-degrees.
+        var quarterSteps = (int)Math.Round(celsius / 0.25);
 
-        RegisterSpan[TemperatureRegister] = (byte)integerPart;
-        RegisterSpan[TemperatureRegister + 1] = (byte)(fractionalPart << 6);
+        // Clamp to representable DS3231 range: -128.00°C..+127.75°C (-512..511 quarter-steps)
+        if (quarterSteps > 511)
+        {
+            quarterSteps = 511;
+        }
+        else if (quarterSteps < -512)
+        {
+            quarterSteps = -512;
+        }
+
+        // Convert to fixed-point: quarterSteps * 0.25°C => shift by 6 bits (2 fractional bits).
+        var raw = (short)(quarterSteps << 6);
+
+        RegisterSpan[TemperatureRegister] = (byte)(raw >> 8);
+        RegisterSpan[TemperatureRegister + 1] = (byte)(raw & 0xFF);
     }
 
     /// <summary>

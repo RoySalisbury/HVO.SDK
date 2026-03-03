@@ -147,7 +147,7 @@ public class Ds3231m : RegisterBasedI2cDevice, IDs3231m
                 data[0] = DecToBcd(utc.Second);
                 data[1] = DecToBcd(utc.Minute);
                 data[2] = DecToBcd(utc.Hour);
-                data[3] = (byte)(((int)utc.DayOfWeek + 7) % 7);
+                data[3] = (byte)((int)utc.DayOfWeek + 1);
                 data[4] = DecToBcd(utc.Day);
                 data[5] = utc.Year >= 2000
                     ? (byte)(DecToBcd(utc.Month) | 0x80)
