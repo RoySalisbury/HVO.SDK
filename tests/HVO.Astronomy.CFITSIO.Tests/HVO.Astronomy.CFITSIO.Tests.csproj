@@ -20,7 +20,7 @@
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" PrivateAssets="all" />
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1" PrivateAssets="all" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.2" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
