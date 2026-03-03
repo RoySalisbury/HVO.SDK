@@ -158,11 +158,12 @@ namespace HVO.Astronomy.Tests
         }
 
         [TestMethod]
-        public void Degrees_24Hours_Returns360()
+        public void Degrees_24Hours_WrapsToZero()
         {
+            // 24h wraps to 0h in right ascension (normalized to [0, 24) range).
             var ra = RightAscension.FromHours(24.0);
 
-            Assert.AreEqual(360.0, ra.Degrees, Tolerance);
+            Assert.AreEqual(0.0, ra.Degrees, Tolerance);
         }
 
         // ────────────────────────────────────────────────────────────────

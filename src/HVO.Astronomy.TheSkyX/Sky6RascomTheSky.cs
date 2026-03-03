@@ -18,7 +18,7 @@ namespace HVO.Astronomy.TheSkyX
         public void AutoMap()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.AutoMap();", out var errorMessage);
         }
@@ -34,7 +34,7 @@ namespace HVO.Astronomy.TheSkyX
         public void ConnectDome()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.ConnectDome();", out var errorMessage);
         }
@@ -42,7 +42,7 @@ namespace HVO.Astronomy.TheSkyX
         public void CoupleDome()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.CoupleDome();", out var errorMessage);
         }
@@ -51,7 +51,7 @@ namespace HVO.Astronomy.TheSkyX
         public void Disconnect()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.Disconnect();", out var errorMessage);
         }
@@ -59,7 +59,7 @@ namespace HVO.Astronomy.TheSkyX
         public void DisconnectDome()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.DisconnectDome();", out var errorMessage);
         }
@@ -67,7 +67,7 @@ namespace HVO.Astronomy.TheSkyX
         public void DisconnectTelescope()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.DisconnectTelescope();", out var errorMessage);
         }
@@ -76,7 +76,7 @@ namespace HVO.Astronomy.TheSkyX
         public (double Altitude, double Azimuth) GetObjectAltAz(string objectName)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             var script = new StringBuilder();
             script.AppendLine($"sky6RASCOMTheSky.GetObjectAzAlt('{objectName}');");
@@ -89,7 +89,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<AltAz>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<AltAz>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.Altitude, result.Azimuth);
         }
 
@@ -97,7 +97,7 @@ namespace HVO.Astronomy.TheSkyX
         public (double RightAscension, double Declination) GetObjectRaDec(string objectName)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             var script = new StringBuilder();
             script.AppendLine($"sky6RASCOMTheSky.GetObjectRaDec('{objectName}');");
@@ -110,7 +110,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.RightAscension, result.Declination);
         }
 
@@ -118,7 +118,7 @@ namespace HVO.Astronomy.TheSkyX
         public (double RightAscension, double Declination) GetObjectRaDec2000(string objectName)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             var script = new StringBuilder();
             script.AppendLine($"sky6RASCOMTheSky.GetObjectRaDec2000('{objectName}');");
@@ -131,7 +131,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.RightAscension, result.Declination);
         }
 
@@ -139,7 +139,7 @@ namespace HVO.Astronomy.TheSkyX
         public void ImageLink(double rightAscension2000, double declination2000, double imageScale)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX($"sky6RASCOMTheSky.ImageLink({rightAscension2000}, {declination2000}, {imageScale});", out var errorMessage);
         }
@@ -148,7 +148,7 @@ namespace HVO.Astronomy.TheSkyX
         public void SetTelescopeParkPosition()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.SetTelescopeParkPosition();", out var errorMessage);
         }
@@ -156,7 +156,7 @@ namespace HVO.Astronomy.TheSkyX
         public void Quit()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.Quit();", out var errorMessage);
         }
@@ -165,7 +165,7 @@ namespace HVO.Astronomy.TheSkyX
         public void SetWhenWhere(double julianDay, int dstOption, int useSystemClock, string description, double latitude, double longitude, double timeZone, double elevation)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             this._theSkyXClient.SendToTheSkyX($"sky6RASCOMTheSky.SetWhenWhere({julianDay}, {dstOption}, {useSystemClock}, '{description}', {latitude}, {longitude}, {timeZone}, {elevation});", out var errorMessage);
         }
@@ -174,7 +174,7 @@ namespace HVO.Astronomy.TheSkyX
         public (double RightAscension, double Declination) GetScreenRaDec()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this.ThowIfNotConnected();
+            this.ThrowIfNotConnected();
 
             var script = new StringBuilder();
             script.AppendLine($"sky6RASCOMTheSky.GetScreenRaDec();");
@@ -187,7 +187,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.RightAscension, result.Declination);
         }
 
@@ -197,7 +197,7 @@ namespace HVO.Astronomy.TheSkyX
             get
             {
                 this._theSkyXClient.ThrowIfNotAttached();
-                this.ThowIfNotConnected();
+                this.ThrowIfNotConnected();
 
                 var model = this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.dScreenRotation", out var errorMessage);
                 if (string.IsNullOrWhiteSpace(model))
@@ -211,7 +211,7 @@ namespace HVO.Astronomy.TheSkyX
             set
             {
                 this._theSkyXClient.ThrowIfNotAttached();
-                this.ThowIfNotConnected();
+                this.ThrowIfNotConnected();
 
                 this._theSkyXClient.SendToTheSkyX($"sky6RASCOMTheSky.dScreenRotation = {value}", out var errorMessage);
             }
@@ -223,7 +223,7 @@ namespace HVO.Astronomy.TheSkyX
             get
             {
                 this._theSkyXClient.ThrowIfNotAttached();
-                this.ThowIfNotConnected();
+                this.ThrowIfNotConnected();
 
                 var model = this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.dScreenFOV", out var errorMessage);
                 if (string.IsNullOrWhiteSpace(model))
@@ -237,7 +237,7 @@ namespace HVO.Astronomy.TheSkyX
             set
             {
                 this._theSkyXClient.ThrowIfNotAttached();
-                this.ThowIfNotConnected();
+                this.ThrowIfNotConnected();
 
                 this._theSkyXClient.SendToTheSkyX($"sky6RASCOMTheSky.dScreenFOV = {value}", out var errorMessage);
             }
@@ -268,7 +268,7 @@ namespace HVO.Astronomy.TheSkyX
             {
                 // According to the documentation, this will always return false
                 this._theSkyXClient.ThrowIfNotAttached();
-                this.ThowIfNotConnected();
+                this.ThrowIfNotConnected();
 
                 var model = this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.IsAsynchronous", out var errorMessage);
                 if (string.IsNullOrWhiteSpace(model))
@@ -282,13 +282,13 @@ namespace HVO.Astronomy.TheSkyX
             set
             {
                 this._theSkyXClient.ThrowIfNotAttached();
-                this.ThowIfNotConnected();
+                this.ThrowIfNotConnected();
 
                 var model = this._theSkyXClient.SendToTheSkyX($"sky6RASCOMTheSky.IsAsynchronous = {(value ? 1 : 0)}", out var errorMessage);
             }
         }
 
-        private void ThowIfNotConnected()
+        private void ThrowIfNotConnected()
         {
             var model = this._theSkyXClient.SendToTheSkyX("sky6RASCOMTheSky.IsConnected", out var errorMessage);
             if (string.IsNullOrWhiteSpace(model))

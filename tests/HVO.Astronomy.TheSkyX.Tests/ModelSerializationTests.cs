@@ -60,12 +60,12 @@ public class ModelSerializationTests
 
     #endregion
 
-    #region TheSkyXSelectedHarware
+    #region TheSkyXSelectedHardware
 
     [TestMethod]
     public void SelectedHardware_DefaultValues()
     {
-        var hw = new TheSkyXSelectedHarware();
+        var hw = new TheSkyXSelectedHardware();
 
         Assert.IsNull(hw.Mount);
         Assert.IsNull(hw.PrimaryCamera);
@@ -76,7 +76,7 @@ public class ModelSerializationTests
     public void SelectedHardware_JsonDeserialization_CaseInsensitive()
     {
         var json = "{\"Mount\":{\"Model\":\"Paramount MX+\"},\"PrimaryCamera\":{\"Model\":\"ZWO ASI2600MM\"}}";
-        var hw = JsonSerializer.Deserialize<TheSkyXSelectedHarware>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var hw = JsonSerializer.Deserialize<TheSkyXSelectedHardware>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
         Assert.IsNotNull(hw);
         Assert.IsNotNull(hw.Mount);

@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the hardware devices selected/configured in TheSkyX.
     /// </summary>
-    public sealed class TheSkyXSelectedHarware
+    public sealed class TheSkyXSelectedHardware
     {
         /// <summary>Gets or sets the primary imaging camera device.</summary>
         public CameraDevice? PrimaryCamera { get; set; }

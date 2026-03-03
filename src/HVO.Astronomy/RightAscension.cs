@@ -70,11 +70,19 @@ namespace HVO.Astronomy
 
         /// <summary>
         /// Creates a <see cref="RightAscension"/> from total hours.
+        /// The value is normalized to the range [0, 24).
         /// </summary>
         /// <param name="totalHours">The right ascension in total hours.</param>
         /// <returns>A new <see cref="RightAscension"/> instance.</returns>
         public static RightAscension FromHours(double totalHours)
         {
+            // Normalize to [0, 24) range — 24h wraps to 0h in right ascension.
+            totalHours = totalHours % 24.0;
+            if (totalHours < 0)
+            {
+                totalHours += 24.0;
+            }
+
             return new RightAscension(TimeSpan.FromHours(totalHours));
         }
 

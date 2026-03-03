@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Text.Json;
 
@@ -31,7 +30,7 @@ namespace HVO.Astronomy.TheSkyX
         public void Execute()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            this._theSkyXClient.SendToTheSkyX("Imagelink.execute()", out var errorMessage);
+            this._theSkyXClient.SendToTheSkyX("ImageLink.execute()", out var errorMessage);
         }
 
         public string PathToFITS
@@ -139,6 +138,11 @@ namespace HVO.Astronomy.TheSkyX
             var result = this._theSkyXClient.SendToTheSkyX(Properties.Resources.TheSkyXScript_GetImageLinkResults, 2048, out var errorMessage);
 
             var model = JsonSerializer.Deserialize<ImageLinkResults>(result, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            if (model == null)
+            {
+                throw new InvalidDataException("Failed to deserialize ImageLink results.");
+            }
+
             return model;
         }
 

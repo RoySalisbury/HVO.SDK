@@ -76,6 +76,10 @@ namespace HVO.Astronomy.TheSkyX
             }
 
             var model = JsonSerializer.Deserialize<Models.TheSkyXClient_InitializeResult>(result, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            if (model == null)
+            {
+                throw new InvalidOperationException("Failed to deserialize TheSkyX initialization response.");
+            }
 
             // The 'revision' and 'build' are backwards based on the .NET class. So we need to swap them around
             var modelVersion = new Version(model.Version);
@@ -113,11 +117,11 @@ namespace HVO.Astronomy.TheSkyX
                     script.AppendLine("if (sky6RASCOMTele.IsConnected == 0) { var mount = { exists: true, isConnected: false }; } else {");
                     script.AppendLine("sky6RASCOMTele.GetRaDec();");
                     script.AppendLine("sky6RASCOMTele.GetAzAlt();");
-                    script.AppendLine("var mount = { exists: true, isConnected: true, isSlewComplete: (sky6RASCOMTele.IsSlewComplete == 1), isTracking: sky6RASCOMTele.IsTracking == 0, isParked: sky6RASCOMTele.IsParked(), ra: sky6RASCOMTele.dRa, dec: sky6RASCOMTele.dDec, alt: sky6RASCOMTele.dAlt, az: sky6RASCOMTele.dAz }; }");
+                    script.AppendLine("var mount = { exists: true, isConnected: true, isSlewComplete: (sky6RASCOMTele.IsSlewComplete == 1), isTracking: sky6RASCOMTele.IsTracking == 1, isParked: sky6RASCOMTele.IsParked(), ra: sky6RASCOMTele.dRa, dec: sky6RASCOMTele.dDec, alt: sky6RASCOMTele.dAlt, az: sky6RASCOMTele.dAz }; }");
                 }
                 else
                 {
-                    script.AppendLine("var mount = { exists: false, isConnected: false, lst = dOut0 };");
+                    script.AppendLine("var mount = { exists: false, isConnected: false, lst: dOut0 };");
                 }
                 #endregion
 
@@ -402,9 +406,10 @@ namespace HVO.Astronomy.TheSkyX
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        var t1 = ex.Message;
+                        // Polling loop — exceptions are expected during shutdown or transient connectivity issues.
+                        // The loop will retry on the next iteration.
                     }
 
                     // Only update the status every 1000 ms.
@@ -469,7 +474,7 @@ namespace HVO.Astronomy.TheSkyX
             get; private set;
         }
 
-        public Models.TheSkyXSelectedHarware? ObservatoryHardware
+        public Models.TheSkyXSelectedHardware? ObservatoryHardware
         {
             get; private set;
         }
@@ -486,12 +491,12 @@ namespace HVO.Astronomy.TheSkyX
             return null;
         }
 
-        private Models.TheSkyXSelectedHarware? GetSelectedHardware()
+        private Models.TheSkyXSelectedHardware? GetSelectedHardware()
         {
             var result = SendToTheSkyX(Properties.Resources.TheSkyXScript_GetSelectedHardware, 4096, out var errorMessage);
             if (string.IsNullOrWhiteSpace(result) == false)
             {
-                var model = JsonSerializer.Deserialize<Models.TheSkyXSelectedHarware>(result, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                var model = JsonSerializer.Deserialize<Models.TheSkyXSelectedHardware>(result, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
                 return model;
             }
 
@@ -587,7 +592,7 @@ namespace HVO.Astronomy.TheSkyX
 
             if (resultText.StartsWith("{\"lst\":") == false)
             {
-                Console.WriteLine(resultText);
+                // Non-status responses are expected for many script calls; no action needed.
             }
 
             // Split out the status message from the return value.
@@ -648,11 +653,21 @@ namespace HVO.Astronomy.TheSkyX
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
-                }
+                    // Cancel and dispose the background status polling task.
+                    try
+                    {
+                        _mainStatusCancellationSource?.Cancel();
+                    }
+                    catch (ObjectDisposedException) { }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
+                    try
+                    {
+                        _mainStatusCancellationSource?.Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
+
+                    _mainStatusCancellationSource = null!;
+                }
 
                 _disposed = true;
             }

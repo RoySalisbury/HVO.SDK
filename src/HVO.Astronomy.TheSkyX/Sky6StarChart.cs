@@ -46,7 +46,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<XYPoint>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<XYPoint>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.X, result.Y);
         }
 
@@ -108,7 +108,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.RightAscension, result.Declination);
         }
 
@@ -178,7 +178,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<ImageSize>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<ImageSize>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return result;
         }
 
@@ -189,7 +189,6 @@ namespace HVO.Astronomy.TheSkyX
             var script = new StringBuilder();
             script.AppendLine($"sky6StarChart.HeightInPixels = {height};");
             script.AppendLine($"sky6StarChart.WidthInPixels = {width};");
-            script.AppendLine("JSON.stringify(objResult)");
 
             this._theSkyXClient.SendToTheSkyX(script.ToString(), out var errorMessage);
         }

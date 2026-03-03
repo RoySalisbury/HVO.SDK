@@ -62,7 +62,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<CameraTemperature>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<CameraTemperature>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (result.IsRegulated == 1, result.Temperature, result.SetPoint, result.TECPower);
         }
 
@@ -94,7 +94,6 @@ namespace HVO.Astronomy.TheSkyX
         {
             this._theSkyXClient.ThrowIfNotAttached();
             var result = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.Abort();", out var errorMessage);
-            Console.WriteLine(result);
         }
 
         public IEnumerable<KeyValuePair<int, string>> GetBinList()
@@ -113,7 +112,7 @@ namespace HVO.Astronomy.TheSkyX
             var serializerOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
             serializerOptions.Converters.Add(new DictionaryKeyValueConverter());
 
-            var result = JsonSerializer.Deserialize<Dictionary<int, string>>(model, serializerOptions);
+            var result = JsonSerializer.Deserialize<Dictionary<int, string>>(model, serializerOptions)!;
             if (result == null)
             {
                 return new Dictionary<int, string>();
@@ -193,7 +192,7 @@ namespace HVO.Astronomy.TheSkyX
                                 throw new InvalidDataException("No response received.");
                             }
 
-                            var imageStatus = JsonSerializer.Deserialize<ImageStatusResult>(statusModel, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                            var imageStatus = JsonSerializer.Deserialize<ImageStatusResult>(statusModel, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
 
                             if ((imageStatus.ExposureComplete) && (imageStatus.ExposureSuccess))
                             {
@@ -482,7 +481,7 @@ namespace HVO.Astronomy.TheSkyX
         public int AtFocus()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.AtFocus());", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.AtFocus();", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -496,7 +495,7 @@ namespace HVO.Astronomy.TheSkyX
         public int AtFocus2()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.AtFocus2());", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.AtFocus2();", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -510,7 +509,7 @@ namespace HVO.Astronomy.TheSkyX
         public int AtFocus3(int averageImages, bool fullAuto)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.AtFocus3({averageImages}, {fullAuto}));", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.AtFocus3({averageImages}, {fullAuto});", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -538,7 +537,7 @@ namespace HVO.Astronomy.TheSkyX
         public int Connect()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.filterWheelConnect());", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.filterWheelConnect();", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -552,7 +551,7 @@ namespace HVO.Astronomy.TheSkyX
         public int Disconnect()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.filterWheelDisconnect());", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.filterWheelDisconnect();", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -566,7 +565,7 @@ namespace HVO.Astronomy.TheSkyX
         public bool IsConnected()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.filterWheelIsConnected());", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.filterWheelIsConnected();", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -574,13 +573,13 @@ namespace HVO.Astronomy.TheSkyX
             }
 
             int.TryParse(model, out var result);
-            return result == 0;
+            return result != 0;
         }
 
         public int GetNumberOfFilters()
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.lNumberFilters);", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.lNumberFilters;", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -594,7 +593,7 @@ namespace HVO.Astronomy.TheSkyX
         public string GetFilterName(int index)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.szFilterName({index}));", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.szFilterName({index});", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -607,7 +606,7 @@ namespace HVO.Astronomy.TheSkyX
         public void SetFilterName(int index, string value)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.setszFilterName({index}, '{value}'));", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.setszFilterName({index}, '{value}');", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -631,7 +630,7 @@ namespace HVO.Astronomy.TheSkyX
             var serializerOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
             serializerOptions.Converters.Add(new DictionaryKeyValueConverter());
 
-            var result = JsonSerializer.Deserialize<Dictionary<int, string>>(model, serializerOptions);
+            var result = JsonSerializer.Deserialize<Dictionary<int, string>>(model, serializerOptions)!;
             if (result == null)
             {
                 return new Dictionary<int, string>();
@@ -643,7 +642,7 @@ namespace HVO.Astronomy.TheSkyX
         public string ReductionGroupFromIndex(int index)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.ReductionGroupFromIndex({index}));", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.ReductionGroupFromIndex({index});", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {
@@ -726,7 +725,7 @@ namespace HVO.Astronomy.TheSkyX
         public int rotatorGotoPositionAngle(double positionAngle)
         {
             this._theSkyXClient.ThrowIfNotAttached();
-            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.rotatorGotoPositionAngle((positionAngle);", out var errorMessage);
+            var model = this._theSkyXClient.SendToTheSkyX($"{this._cameraScriptName}.rotatorGotoPositionAngle({positionAngle});", out var errorMessage);
 
             if (string.IsNullOrWhiteSpace(model))
             {

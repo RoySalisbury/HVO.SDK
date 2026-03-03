@@ -102,7 +102,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<AltAz>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<AltAz>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (Altitude: result.Altitude, Azimuth : result.Azimuth);
         }
 
@@ -121,7 +121,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (RightAscension: result.RightAscension, Declination: result.Declination);
         }
 
@@ -150,7 +150,7 @@ namespace HVO.Astronomy.TheSkyX
 
             var script = new StringBuilder();
             script.AppendLine($"sky6Utils.ConvertCalenderToJulianDate({year}, {month}, {day}, {hour}, {minute}, {second});");
-            script.AppendLine("sky6Utils.dOut0)");
+            script.AppendLine("sky6Utils.dOut0");
 
             var model = this._theSkyXClient.SendToTheSkyX(script.ToString(), out var errorMessage);
             if (string.IsNullOrWhiteSpace(model))
@@ -168,7 +168,7 @@ namespace HVO.Astronomy.TheSkyX
 
             var script = new StringBuilder();
             script.AppendLine($"sky6Utils.ConvertDMSToAngle({degrees}, {minutes}, {seconds});");
-            script.AppendLine("sky6Utils.dOut0)");
+            script.AppendLine("sky6Utils.dOut0");
 
             var model = this._theSkyXClient.SendToTheSkyX(script.ToString(), out var errorMessage);
             if (string.IsNullOrWhiteSpace(model))
@@ -195,7 +195,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<DegMinSec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<DegMinSec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (Degrees: result.Degrees, Minutes: result.Minutes, Seconds: result.Seconds);
         }
 
@@ -375,7 +375,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RiseTransitSetTimes>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RiseTransitSetTimes>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (Rise: TimeSpan.FromHours(result.Rise), Transit: TimeSpan.FromHours(result.Transit), Set: TimeSpan.FromHours(result.Set));
         }
 
@@ -394,7 +394,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (RightAscension : result.RightAscension, Declination: result.Declination);
         }
 
@@ -413,7 +413,7 @@ namespace HVO.Astronomy.TheSkyX
                 throw new InvalidDataException("No response received.");
             }
 
-            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var result = JsonSerializer.Deserialize<RaDec>(model, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })!;
             return (RightAscension: result.RightAscension, Declination: result.Declination);
         }
 
