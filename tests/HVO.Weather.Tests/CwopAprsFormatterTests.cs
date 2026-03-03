@@ -11,7 +11,7 @@ public class CwopAprsFormatterTests
     [TestMethod]
     public void FormatPacket_NullObservation_ThrowsArgumentNullException()
     {
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
             CwopAprsFormatter.FormatPacket(null!));
     }
 
@@ -163,14 +163,14 @@ public class CwopAprsFormatterTests
     [TestMethod]
     public void FormatLogin_NullStationId_ThrowsArgumentNullException()
     {
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
             CwopAprsFormatter.FormatLogin(null!, -1, "1.0"));
     }
 
     [TestMethod]
     public void FormatLogin_EmptyStationId_ThrowsArgumentNullException()
     {
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
             CwopAprsFormatter.FormatLogin("", -1, "1.0"));
     }
 
@@ -186,7 +186,7 @@ public class CwopAprsFormatterTests
 
     #region Internal Format Helpers
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(35, 33, 36.18, "N", "3533.60N")]
     [DataRow(0, 0, 0.0, "N", "0000.00N")]
     [DataRow(90, 0, 0.0, "S", "9000.00S")]
@@ -197,7 +197,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(113, 54, 34.14, "W", "11354.57W")]
     [DataRow(0, 0, 0.0, "E", "00000.00E")]
     [DataRow(180, 0, 0.0, "W", "18000.00W")]
@@ -208,7 +208,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(180.0, "180")]
     [DataRow(0.0, "000")]
     [DataRow(360.0, "360")]
@@ -220,7 +220,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(5.0, "005")]
     [DataRow(0.0, "000")]
     [DataRow(100.0, "100")]
@@ -231,7 +231,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(72.0, "072")]
     [DataRow(0.0, "000")]
     [DataRow(-5.0, "-05")]
@@ -244,7 +244,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(0.05, "005")]
     [DataRow(0.0, "000")]
     [DataRow(1.0, "100")]
@@ -255,7 +255,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(450.0, "L450")]
     [DataRow(0.0, "L000")]
     [DataRow(999.0, "L999")]
@@ -268,7 +268,7 @@ public class CwopAprsFormatterTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(50.0, "50")]
     [DataRow(100.0, "00")]
     [DataRow(0.0, "01")]

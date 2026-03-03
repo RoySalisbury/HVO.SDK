@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace HVO.Core.Extensions;
@@ -102,6 +103,11 @@ public static class CollectionExtensions
     /// <param name="comparer">Optional comparer for the key type</param>
     /// <returns>Distinct elements by key</returns>
     /// <exception cref="ArgumentNullException">Thrown when source or keySelector is null</exception>
+    /// <remarks>
+    /// On .NET 6+, the built-in <c>Enumerable.DistinctBy</c> provides the same functionality.
+    /// Use fully qualified names or aliases to resolve ambiguity when both are visible.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static IEnumerable<T> DistinctBy<T, TKey>(
         this IEnumerable<T> source,
         Func<T, TKey> keySelector,
@@ -131,6 +137,11 @@ public static class CollectionExtensions
     /// <returns>Chunks of the requested size</returns>
     /// <exception cref="ArgumentNullException">Thrown when source is null</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when size is less than or equal to zero</exception>
+    /// <remarks>
+    /// On .NET 6+, the built-in <c>Enumerable.Chunk</c> provides the same functionality.
+    /// Use fully qualified names or aliases to resolve ambiguity when both are visible.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static IEnumerable<T[]> Chunk<T>(this IEnumerable<T> source, int size)
     {
         if (source == null) throw new ArgumentNullException(nameof(source));
@@ -153,7 +164,7 @@ public static class CollectionExtensions
     }
 
     /// <summary>
-    /// Randomly shuffles the elements of a sequence
+    /// Randomly shuffles the elements of a sequence using a new <see cref="Random"/> instance.
     /// </summary>
     /// <typeparam name="T">The type of elements in the collection</typeparam>
     /// <param name="source">The collection to shuffle</param>
@@ -161,16 +172,30 @@ public static class CollectionExtensions
     /// <exception cref="ArgumentNullException">Thrown when source is null</exception>
     public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
     {
+        return Shuffle(source, new Random());
+    }
+
+    /// <summary>
+    /// Randomly shuffles the elements of a sequence using the specified <see cref="Random"/> instance.
+    /// Use this overload for deterministic (seed-based) shuffling in tests.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the collection</typeparam>
+    /// <param name="source">The collection to shuffle</param>
+    /// <param name="random">The random number generator to use</param>
+    /// <returns>A new sequence with elements in random order</returns>
+    /// <exception cref="ArgumentNullException">Thrown when source or random is null</exception>
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random random)
+    {
         if (source == null) throw new ArgumentNullException(nameof(source));
+        if (random == null) throw new ArgumentNullException(nameof(random));
 
         var list = source.ToList();
-        var rng = new Random();
         int n = list.Count;
 
         while (n > 1)
         {
             n--;
-            int k = rng.Next(n + 1);
+            int k = random.Next(n + 1);
             T value = list[k];
             list[k] = list[n];
             list[n] = value;

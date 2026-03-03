@@ -5,7 +5,7 @@ namespace HVO.Weather.DavisVantagePro.Tests;
 [TestClass]
 public class ForecastIconTests
 {
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(ForecastIcon.Cloud, 2)]
     [DataRow(ForecastIcon.CloudRain, 3)]
     [DataRow(ForecastIcon.PartialSunCloud, 6)]
@@ -24,7 +24,7 @@ public class ForecastIconTests
 [TestClass]
 public class BarometerTrendTests
 {
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(BarometerTrend.Unknown, (short)80)]
     [DataRow(BarometerTrend.FallingRapidly, (short)196)]
     [DataRow(BarometerTrend.FallingSlowly, (short)236)]

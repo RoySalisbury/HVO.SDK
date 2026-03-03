@@ -64,6 +64,12 @@ public static class FitsImage
   /// <summary>
   /// Read the current image HDU as unsigned 16-bit grayscale (row-major).
   /// </summary>
+  /// <remarks>
+  /// For large images (e.g., 4096×4096 = 33 MB), the returned pixel array will be allocated
+  /// on the Large Object Heap (LOH). Callers processing many images in sequence should be
+  /// aware of potential LOH fragmentation. Consider pooling or reusing buffers at the
+  /// application level if this becomes a concern.
+  /// </remarks>
   public static Result<(ushort[] Pixels, int Width, int Height)> ReadU16(FitsFile fits)
   {
     if (fits is null) return Result<(ushort[] Pixels, int Width, int Height)>.Failure(new ArgumentNullException(nameof(fits)));
@@ -85,6 +91,11 @@ public static class FitsImage
   /// <summary>
   /// Read the current image HDU as unsigned 8-bit grayscale (row-major).
   /// </summary>
+  /// <remarks>
+  /// For very large images, the returned pixel array may be allocated on the Large Object
+  /// Heap (LOH). Callers processing many images in sequence should be aware of potential
+  /// LOH fragmentation.
+  /// </remarks>
   public static Result<(byte[] Pixels, int Width, int Height)> ReadU8(FitsFile fits)
   {
     if (fits is null) return Result<(byte[] Pixels, int Width, int Height)>.Failure(new ArgumentNullException(nameof(fits)));

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -18,7 +19,7 @@ namespace HVO.Core.Results;
 /// or the implicit conversion operators. Using <c>default</c> directly will produce a misleading
 /// "successful" result with a null value.</para>
 /// </remarks>
-public readonly struct Result<T>
+public readonly struct Result<T> : IEquatable<Result<T>>
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly T _value;
@@ -129,6 +130,31 @@ public readonly struct Result<T>
     /// <param name="exception">The exception representing the failure</param>
     /// <returns>A failed Result</returns>
     public static Result<T> Failure(Exception exception) => new(exception);
+
+    /// <inheritdoc />
+    public bool Equals(Result<T> other)
+    {
+        if (IsSuccessful != other.IsSuccessful) return false;
+        if (IsSuccessful) return EqualityComparer<T>.Default.Equals(_value, other._value);
+        // Both failures — compare by exception reference
+        return ReferenceEquals(Error, other.Error);
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is Result<T> other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        if (IsFailure) return Error?.GetHashCode() ?? 0;
+        return EqualityComparer<T>.Default.GetHashCode(_value!);
+    }
+
+    /// <summary>Equality operator</summary>
+    public static bool operator ==(Result<T> left, Result<T> right) => left.Equals(right);
+
+    /// <summary>Inequality operator</summary>
+    public static bool operator !=(Result<T> left, Result<T> right) => !left.Equals(right);
 }
 
 /// <summary>
@@ -143,7 +169,7 @@ public readonly struct Result<T>
 /// Always construct instances via <see cref="Success"/>, <see cref="Failure(TEnum)"/>, or the
 /// implicit conversion operators.</para>
 /// </remarks>
-public readonly struct Result<T, TEnum> where TEnum : Enum
+public readonly struct Result<T, TEnum> : IEquatable<Result<T, TEnum>> where TEnum : Enum
 {
     private readonly T _value;
     private readonly (TEnum code, string? message)? _error;
@@ -252,4 +278,33 @@ public readonly struct Result<T, TEnum> where TEnum : Enum
     /// <param name="code">The error code</param>
     /// <returns>A failed Result</returns>
     public static Result<T, TEnum> Failure(TEnum code) => new(code);
+
+    /// <inheritdoc />
+    public bool Equals(Result<T, TEnum> other)
+    {
+        if (IsSuccessful != other.IsSuccessful) return false;
+        if (IsSuccessful) return EqualityComparer<T>.Default.Equals(_value, other._value);
+        return EqualityComparer<TEnum>.Default.Equals(Error.Code, other.Error.Code)
+               && string.Equals(Error.Message, other.Error.Message, StringComparison.Ordinal);
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is Result<T, TEnum> other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        if (IsFailure)
+        {
+            int h = EqualityComparer<TEnum>.Default.GetHashCode(Error.Code);
+            return h * 397 ^ (Error.Message?.GetHashCode() ?? 0);
+        }
+        return EqualityComparer<T>.Default.GetHashCode(_value!);
+    }
+
+    /// <summary>Equality operator</summary>
+    public static bool operator ==(Result<T, TEnum> left, Result<T, TEnum> right) => left.Equals(right);
+
+    /// <summary>Inequality operator</summary>
+    public static bool operator !=(Result<T, TEnum> left, Result<T, TEnum> right) => !left.Equals(right);
 }

@@ -608,6 +608,30 @@ public sealed partial class FitsFile : IDisposable
   }
 
   /// <summary>
+  /// Finalizer to release unmanaged memory (control blocks and external buffers)
+  /// if the caller neglects to call <see cref="Dispose"/>.
+  /// Uses the same disposal order as <see cref="Dispose"/>: close the CFITSIO handle
+  /// first (which triggers the realloc callback to free the buffer), then free
+  /// the control blocks. This prevents use-after-free if CFITSIO accesses the
+  /// control blocks during handle finalization.
+  /// </summary>
+  ~FitsFile()
+  {
+    try
+    {
+      Handle.Dispose();
+    }
+    catch
+    {
+      // Suppress exceptions in finalizer — best-effort cleanup only.
+    }
+    finally
+    {
+      DisposeMemoryResources();
+    }
+  }
+
+  /// <summary>
   /// Dispose the file and close the underlying native handle. Safe to call multiple times.
   /// </summary>
   public void Dispose()
@@ -620,6 +644,7 @@ public sealed partial class FitsFile : IDisposable
     {
       // Clean up memory resources (control blocks and external buffers)
       DisposeMemoryResources();
+      GC.SuppressFinalize(this);
     }
   }
 

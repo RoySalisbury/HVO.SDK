@@ -77,9 +77,9 @@ public class PeriodicEventArgsTests
         args.RightAscension = ra;
 
         Assert.IsNotNull(args.RightAscension);
-        Assert.AreEqual(12, args.RightAscension.Hours);
-        Assert.AreEqual(30, args.RightAscension.Minutes);
-        Assert.AreEqual(45, args.RightAscension.Seconds);
+        Assert.AreEqual(12, args.RightAscension.Value.Hours);
+        Assert.AreEqual(30, args.RightAscension.Value.Minutes);
+        Assert.AreEqual(45, args.RightAscension.Value.Seconds);
     }
 
     #endregion

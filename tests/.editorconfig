@@ -1,0 +1,11 @@
+# MSTest 4.x analyzer rule overrides for test projects
+# These rules suggest newer assertion APIs introduced in MSTest 4.0.
+# Downgraded to suggestions to allow incremental adoption.
+
+[*.cs]
+
+# MSTEST0037: Use preferred assertion methods (Assert.HasCount, Assert.IsLessThan, etc.)
+dotnet_diagnostic.MSTEST0037.severity = suggestion
+
+# MSTEST0032: Assertions with conditions known to be always true
+dotnet_diagnostic.MSTEST0032.severity = suggestion

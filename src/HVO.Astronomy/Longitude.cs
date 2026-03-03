@@ -6,7 +6,7 @@ namespace HVO.Astronomy
     /// Represents a geographic longitude in degrees-minutes-seconds with hemisphere.
     /// Provides implicit conversions to and from <see cref="double"/>.
     /// </summary>
-    public sealed class Longitude
+    public readonly struct Longitude : IEquatable<Longitude>
     {
         /// <summary>
         /// Initializes a new <see cref="Longitude"/> from DMS components.
@@ -75,5 +75,29 @@ namespace HVO.Astronomy
             string dir = Hemisphere == LongitudeHemisphere.East ? "E" : "W";
             return string.Format("{0} {1}\u00B0 {2}' {3:F1}\"", dir, Degrees, Minutes, Seconds);
         }
+
+        /// <inheritdoc />
+        public bool Equals(Longitude other)
+            => Degrees == other.Degrees && Minutes == other.Minutes
+               && Seconds.Equals(other.Seconds) && Hemisphere == other.Hemisphere;
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is Longitude other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            int h = Degrees;
+            h = h * 397 ^ Minutes;
+            h = h * 397 ^ Seconds.GetHashCode();
+            h = h * 397 ^ (int)Hemisphere;
+            return h;
+        }
+
+        /// <summary>Equality operator</summary>
+        public static bool operator ==(Longitude left, Longitude right) => left.Equals(right);
+
+        /// <summary>Inequality operator</summary>
+        public static bool operator !=(Longitude left, Longitude right) => !left.Equals(right);
     }
 }

@@ -91,7 +91,7 @@ public class DavisVantageProConsoleRecordTests
         var data = CreateValidLoopPacket(outsideTemp: 720, insideTemp: 700);
         var record = DavisVantageProConsoleRecord.Create(data, DateTimeOffset.Now);
 
-        Assert.AreEqual(72.0, record.OutsideTemperature!.Fahrenheit, 0.1);
+        Assert.AreEqual(72.0, record.OutsideTemperature!.Value.Fahrenheit, 0.1);
         Assert.AreEqual(70.0, record.InsideTemperature.Fahrenheit, 0.1);
     }
 
@@ -144,14 +144,14 @@ public class DavisVantageProConsoleRecordTests
     [TestMethod]
     public void Create_NullData_ThrowsArgumentOutOfRangeException()
     {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             DavisVantageProConsoleRecord.Create(null!, DateTimeOffset.Now));
     }
 
     [TestMethod]
     public void Create_ShortData_ThrowsArgumentOutOfRangeException()
     {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             DavisVantageProConsoleRecord.Create(new byte[50], DateTimeOffset.Now));
     }
 
@@ -162,7 +162,7 @@ public class DavisVantageProConsoleRecordTests
         // Corrupt a byte to invalidate CRC
         data[10] = 0xFF;
 
-        Assert.ThrowsException<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
             DavisVantageProConsoleRecord.Create(data, DateTimeOffset.Now));
     }
 
@@ -180,7 +180,7 @@ public class DavisVantageProConsoleRecordTests
             crcBytes.CopyTo(data, 97);
         }
 
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
             DavisVantageProConsoleRecord.Create(data, DateTimeOffset.Now));
     }
 
@@ -231,7 +231,7 @@ public class DavisVantageProConsoleRecordTests
         var record = DavisVantageProConsoleRecord.Create(data, DateTimeOffset.Now);
 
         Assert.IsNotNull(record.OutsideDewpoint, "Dew point should be computed when temp and humidity are available");
-        Assert.IsTrue(record.OutsideDewpoint!.Celsius < record.OutsideTemperature!.Celsius,
+        Assert.IsTrue(record.OutsideDewpoint!.Value.Celsius < record.OutsideTemperature!.Value.Celsius,
             "Dew point should be lower than ambient temperature at less than 100% humidity");
     }
 

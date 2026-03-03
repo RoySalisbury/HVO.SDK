@@ -6,8 +6,18 @@ namespace HVO.Weather
     /// Represents a compass direction as a degree value (0–359) with conversion to the nearest
     /// 16-point <see cref="CompassPoint"/>.
     /// </summary>
-    public sealed class Direction
+    public readonly struct Direction : IEquatable<Direction>, IComparable<Direction>
     {
+        private static readonly CompassPoint[] CompassPoints = new[]
+        {
+            CompassPoint.N, CompassPoint.NNE, CompassPoint.NE, CompassPoint.ENE,
+            CompassPoint.E, CompassPoint.ESE, CompassPoint.SE, CompassPoint.SSE,
+            CompassPoint.S, CompassPoint.SSW, CompassPoint.SW, CompassPoint.WSW,
+            CompassPoint.W, CompassPoint.WNW, CompassPoint.NW, CompassPoint.NNW
+        };
+
+        private readonly short _degree;
+
         /// <summary>
         /// Initializes a new <see cref="Direction"/> from a degree value.
         /// </summary>
@@ -24,12 +34,7 @@ namespace HVO.Weather
             }
 
             // Normalize 360 to 0
-            if (degree == 360)
-            {
-                degree = 0;
-            }
-
-            Degree = degree;
+            _degree = degree == 360 ? (short)0 : degree;
         }
 
         /// <summary>
@@ -38,13 +43,13 @@ namespace HVO.Weather
         /// <param name="cardinalPoint">The compass point to use as the direction.</param>
         public Direction(CompassPoint cardinalPoint)
         {
-            Degree = (short)cardinalPoint;
+            _degree = (short)cardinalPoint;
         }
 
         /// <summary>
         /// Gets the direction in degrees (0–359).
         /// </summary>
-        public short Degree { get; }
+        public short Degree => _degree;
 
         /// <summary>
         /// Gets the closest 16-point <see cref="CompassPoint"/> for the current degree value.
@@ -53,39 +58,47 @@ namespace HVO.Weather
         {
             get
             {
-                if (Degree >= (short)CompassPoint.N && Degree < (short)CompassPoint.NNE)
-                    return CompassPoint.N;
-                else if (Degree >= (short)CompassPoint.NNE && Degree < (short)CompassPoint.NE)
-                    return CompassPoint.NNE;
-                else if (Degree >= (short)CompassPoint.NE && Degree < (short)CompassPoint.ENE)
-                    return CompassPoint.NE;
-                else if (Degree >= (short)CompassPoint.ENE && Degree < (short)CompassPoint.E)
-                    return CompassPoint.ENE;
-                else if (Degree >= (short)CompassPoint.E && Degree < (short)CompassPoint.ESE)
-                    return CompassPoint.E;
-                else if (Degree >= (short)CompassPoint.ESE && Degree < (short)CompassPoint.SE)
-                    return CompassPoint.ESE;
-                else if (Degree >= (short)CompassPoint.SE && Degree < (short)CompassPoint.SSE)
-                    return CompassPoint.SE;
-                else if (Degree >= (short)CompassPoint.SSE && Degree < (short)CompassPoint.S)
-                    return CompassPoint.SSE;
-                else if (Degree >= (short)CompassPoint.S && Degree < (short)CompassPoint.SSW)
-                    return CompassPoint.S;
-                else if (Degree >= (short)CompassPoint.SSW && Degree < (short)CompassPoint.SW)
-                    return CompassPoint.SSW;
-                else if (Degree >= (short)CompassPoint.SW && Degree < (short)CompassPoint.WSW)
-                    return CompassPoint.SW;
-                else if (Degree >= (short)CompassPoint.WSW && Degree < (short)CompassPoint.W)
-                    return CompassPoint.WSW;
-                else if (Degree >= (short)CompassPoint.W && Degree < (short)CompassPoint.WNW)
-                    return CompassPoint.W;
-                else if (Degree >= (short)CompassPoint.WNW && Degree < (short)CompassPoint.NW)
-                    return CompassPoint.WNW;
-                else if (Degree >= (short)CompassPoint.NW && Degree < (short)CompassPoint.NNW)
-                    return CompassPoint.NW;
-                else
-                    return CompassPoint.NNW;
+                for (int i = CompassPoints.Length - 1; i >= 0; i--)
+                {
+                    if (_degree >= (short)CompassPoints[i])
+                        return CompassPoints[i];
+                }
+
+                return CompassPoint.N;
             }
         }
+
+        /// <inheritdoc />
+        public bool Equals(Direction other) => _degree == other._degree;
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is Direction other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => _degree.GetHashCode();
+
+        /// <inheritdoc />
+        public int CompareTo(Direction other) => _degree.CompareTo(other._degree);
+
+        /// <inheritdoc />
+        public override string ToString() => $"{_degree}°";
+
+        /// <summary>Equality operator</summary>
+        public static bool operator ==(Direction left, Direction right) => left.Equals(right);
+
+        /// <summary>Inequality operator</summary>
+        public static bool operator !=(Direction left, Direction right) => !left.Equals(right);
+
+        /// <summary>Less-than operator</summary>
+        public static bool operator <(Direction left, Direction right) => left._degree < right._degree;
+
+        /// <summary>Greater-than operator</summary>
+        public static bool operator >(Direction left, Direction right) => left._degree > right._degree;
+
+        /// <summary>Less-than-or-equal operator</summary>
+        public static bool operator <=(Direction left, Direction right) => left._degree <= right._degree;
+
+        /// <summary>Greater-than-or-equal operator</summary>
+        public static bool operator >=(Direction left, Direction right) => left._degree >= right._degree;
     }
 }

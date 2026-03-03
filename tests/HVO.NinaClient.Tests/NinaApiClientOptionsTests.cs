@@ -91,7 +91,7 @@ public class NinaApiClientOptionsTests
             BaseUrl = "ftp://invalid-scheme"
         };
 
-        Assert.ThrowsException<ArgumentException>(() => options.ValidateAndThrow());
+        Assert.ThrowsExactly<ArgumentException>(() => options.ValidateAndThrow());
     }
 
     [TestMethod]

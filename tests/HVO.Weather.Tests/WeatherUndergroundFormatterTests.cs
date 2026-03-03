@@ -11,7 +11,7 @@ public class WeatherUndergroundFormatterTests
     [TestMethod]
     public void FormatUrl_NullObservation_ThrowsArgumentNullException()
     {
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
             WeatherUndergroundFormatter.FormatUrl(null!));
     }
 
@@ -52,7 +52,7 @@ public class WeatherUndergroundFormatterTests
     [TestMethod]
     public void FormatQueryString_NullObservation_ThrowsArgumentNullException()
     {
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
             WeatherUndergroundFormatter.FormatQueryString(null!));
     }
 

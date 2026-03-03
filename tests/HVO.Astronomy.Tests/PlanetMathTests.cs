@@ -16,11 +16,11 @@ namespace HVO.Astronomy.Tests
         // ────────────────────────────────────────────────────────────────
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ComputeTopocentricPositions_NullBodies_ThrowsArgumentNullException()
         {
-            PlanetMath.ComputeTopocentricPositions(HvoLatitude, HvoLongitude,
-                new DateTime(2024, 6, 15, 3, 0, 0, DateTimeKind.Utc), null!);
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+                PlanetMath.ComputeTopocentricPositions(HvoLatitude, HvoLongitude,
+                    new DateTime(2024, 6, 15, 3, 0, 0, DateTimeKind.Utc), null!));
         }
 
         [TestMethod]

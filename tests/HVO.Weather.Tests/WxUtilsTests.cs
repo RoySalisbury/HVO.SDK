@@ -95,7 +95,7 @@ public class WxUtilsTests
     {
         var temp = Temperature.FromCelsius(20.0);
 
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => WxUtils.DewPoint(temp, 0));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => WxUtils.DewPoint(temp, 0));
     }
 
     #endregion

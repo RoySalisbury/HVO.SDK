@@ -167,7 +167,7 @@ namespace HVO.Weather.DavisVantagePro
         public double Barometer { get; private set; }
 
         /// <summary>Gets the inside temperature.</summary>
-        public Temperature InsideTemperature { get; private set; } = null!;
+        public Temperature InsideTemperature { get; private set; }
 
         /// <summary>Gets the inside relative humidity (0–100).</summary>
         public byte InsideHumidity { get; private set; }
@@ -243,13 +243,13 @@ namespace HVO.Weather.DavisVantagePro
         {
             get
             {
-                if (OutsideTemperature != null && OutsideHumidity != null && OutsideTemperature.Fahrenheit > 80 && OutsideHumidity > 40)
+                if (OutsideTemperature != null && OutsideHumidity != null && OutsideTemperature.Value.Fahrenheit > 80 && OutsideHumidity > 40)
                 {
                     var dewPoint = OutsideDewpoint;
                     if (dewPoint != null)
                     {
-                        double heatIndex = OutsideTemperature.Fahrenheit -
-                            (0.9971 * Math.Exp(0.020867 * (OutsideTemperature.Fahrenheit * (1 - Math.Exp(0.0445 * (dewPoint.Fahrenheit - 57.2))))));
+                        double heatIndex = OutsideTemperature.Value.Fahrenheit -
+                            (0.9971 * Math.Exp(0.020867 * (OutsideTemperature.Value.Fahrenheit * (1 - Math.Exp(0.0445 * (dewPoint.Value.Fahrenheit - 57.2))))));
                         return Temperature.FromFahrenheit(heatIndex);
                     }
                 }
@@ -270,10 +270,10 @@ namespace HVO.Weather.DavisVantagePro
             {
                 if (OutsideTemperature != null && TenMinuteWindSpeedAverage != null && TenMinuteWindSpeedAverage > 0)
                 {
-                    double windChill = 3.16 - (1.20 * TenMinuteWindSpeedAverage.Value) + (0.980 * OutsideTemperature.Fahrenheit)
+                    double windChill = 3.16 - (1.20 * TenMinuteWindSpeedAverage.Value) + (0.980 * OutsideTemperature.Value.Fahrenheit)
                         + (0.0044 * Math.Pow(TenMinuteWindSpeedAverage.Value, 2))
-                        + (0.0083 * TenMinuteWindSpeedAverage.Value * OutsideTemperature.Fahrenheit);
-                    return Temperature.FromFahrenheit(windChill < OutsideTemperature.Fahrenheit ? windChill : OutsideTemperature.Fahrenheit);
+                        + (0.0083 * TenMinuteWindSpeedAverage.Value * OutsideTemperature.Value.Fahrenheit);
+                    return Temperature.FromFahrenheit(windChill < OutsideTemperature.Value.Fahrenheit ? windChill : OutsideTemperature.Value.Fahrenheit);
                 }
                 return OutsideTemperature;
             }
@@ -296,7 +296,7 @@ namespace HVO.Weather.DavisVantagePro
                 if (OutsideTemperature != null && OutsideHumidity != null && OutsideHumidity > 0)
                 {
                     double outsideHumidity = (double)OutsideHumidity.Value;
-                    double z1 = ((17.27 * OutsideTemperature.Celsius) / (237.7 + OutsideTemperature.Celsius)) + Math.Log(outsideHumidity / 100);
+                    double z1 = ((17.27 * OutsideTemperature.Value.Celsius) / (237.7 + OutsideTemperature.Value.Celsius)) + Math.Log(outsideHumidity / 100);
                     return Temperature.FromCelsius((237.7 * z1) / (17.27 - z1));
                 }
                 return null;

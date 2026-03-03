@@ -114,20 +114,7 @@ public static class StringExtensions
             return false;
         }
 
-        try
-        {
-            result = (TEnum)Enum.Parse(typeof(TEnum), value, ignoreCase);
-            return true;
-        }
-        catch (Exception)
-        {
-            // Enum.Parse can throw ArgumentException (not a valid member) or
-            // OverflowException (underlying value out of range). We use catch(Exception)
-            // rather than a bare catch to avoid swallowing SEH/CLR-critical exceptions.
-            // This follows the standard TryParse pattern of returning false on failure.
-            result = default;
-            return false;
-        }
+        return Enum.TryParse(value, ignoreCase, out result);
     }
 
     /// <summary>

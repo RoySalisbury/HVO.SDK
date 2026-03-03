@@ -99,7 +99,7 @@ public class ResultTests
         var result = Result<int>.Failure(new Exception("Test error"));
 
         // Act & Assert
-        Assert.ThrowsException<Exception>(() => { var value = result.Value; });
+        Assert.ThrowsExactly<Exception>(() => { var value = result.Value; });
     }
 }
 

@@ -62,7 +62,7 @@ public class NamedOneOfGenerator : IIncrementalGenerator
         var arrayArgs = attr.ConstructorArguments[0].Values;
         if (arrayArgs.Length % 2 != 0) return;
 
-        var cases = new (string Name, string TypeName)[arrayArgs.Length / 2];
+        var cases = new (string Name, string TypeName, bool IsValueType)[arrayArgs.Length / 2];
 
         for (int i = 0; i < arrayArgs.Length; i += 2)
         {
@@ -70,23 +70,26 @@ public class NamedOneOfGenerator : IIncrementalGenerator
 
             // Handle both typeof() and string type names
             string typeName;
+            bool isValueType = false;
             var typeArg = arrayArgs[i + 1];
 
             if (typeArg.Value is ITypeSymbol typeSymbol)
             {
-                // Handle typeof() expressions
+                // Handle typeof() expressions — use Roslyn API for accurate value type detection
                 typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                isValueType = typeSymbol.IsValueType;
             }
             else
             {
-                // Handle string type names
+                // Handle string type names — fall back to well-known type check
                 typeName = typeArg.Value?.ToString() ?? string.Empty;
+                isValueType = IsWellKnownValueType(typeName);
             }
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(typeName))
                 continue;
 
-            cases[i / 2] = (name, typeName);
+            cases[i / 2] = (name, typeName, isValueType);
         }
 
         var namespaceName = symbol.ContainingNamespace.IsGlobalNamespace ? "" : symbol.ContainingNamespace.ToDisplayString();
@@ -94,7 +97,7 @@ public class NamedOneOfGenerator : IIncrementalGenerator
         context.AddSource($"{symbol.Name}_NamedOneOf.g.cs", code);
     }
 
-    private static string GenerateOneOfClass(string className, string namespaceName, (string Name, string TypeName)[] cases)
+    private static string GenerateOneOfClass(string className, string namespaceName, (string Name, string TypeName, bool IsValueType)[] cases)
     {
         var sb = new StringBuilder();
         sb.AppendLine("#nullable enable");
@@ -193,7 +196,7 @@ public class NamedOneOfGenerator : IIncrementalGenerator
             sb.AppendLine($"{indent}        {{");
 
             // Handle value types vs reference types differently for null check
-            if (IsValueType(cleanTypeName))
+            if (c.IsValueType)
             {
                 sb.AppendLine($"{indent}            var val = element.Deserialize<{cleanTypeName}>(options);");
                 sb.AppendLine($"{indent}            return new {className}(val) {{ RawJson = element }};");
@@ -234,12 +237,14 @@ public class NamedOneOfGenerator : IIncrementalGenerator
         return sb.ToString();
     }
 
-    private static bool IsValueType(string typeName)
+    /// <summary>
+    /// Fallback check for well-known value types when Roslyn ITypeSymbol is not available.
+    /// Prefer using ITypeSymbol.IsValueType when the symbol is accessible.
+    /// </summary>
+    private static bool IsWellKnownValueType(string typeName)
     {
-        // Clean up fully qualified names for comparison
         var cleanTypeName = typeName.Replace("global::", "").Replace("System.", "");
 
-        // Common value types
         return cleanTypeName switch
         {
             "int" or "Int32" => true,
