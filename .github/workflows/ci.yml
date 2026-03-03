@@ -17,8 +17,134 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  # ────────────────────────────────────────────────────
+  # Stage 1: Detect which project groups changed
+  # ────────────────────────────────────────────────────
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      # If true, build/test everything (repo-wide files changed)
+      full_build: ${{ steps.detect.outputs.full_build }}
+      # Individual project group flags
+      core: ${{ steps.detect.outputs.core }}
+      core_generators: ${{ steps.detect.outputs.core_generators }}
+      astronomy: ${{ steps.detect.outputs.astronomy }}
+      astronomy_cfitsio: ${{ steps.detect.outputs.astronomy_cfitsio }}
+      astronomy_theskyx: ${{ steps.detect.outputs.astronomy_theskyx }}
+      weather: ${{ steps.detect.outputs.weather }}
+      weather_dvp: ${{ steps.detect.outputs.weather_dvp }}
+      power: ${{ steps.detect.outputs.power }}
+      nina: ${{ steps.detect.outputs.nina }}
+      iot: ${{ steps.detect.outputs.iot }}
+      zwo: ${{ steps.detect.outputs.zwo }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed project groups
+        id: detect
+        run: |
+          # Get changed files between HEAD and merge base
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+
+          # Fallback for initial commits or force pushes
+          if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
+            echo "full_build=true" >> "$GITHUB_OUTPUT"
+            echo "No base commit — full build required"
+            exit 0
+          fi
+
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
+          echo "Changed files:"
+          echo "$CHANGED"
+          echo ""
+
+          # Repo-wide files that affect everything → full build
+          if echo "$CHANGED" | grep -qE '^(Directory\.Build\.(props|targets)|global\.json|HVO\.SDK\.sln|\.github/workflows/ci\.yml|\.editorconfig)'; then
+            echo "full_build=true" >> "$GITHUB_OUTPUT"
+            echo "Repo-wide file changed — full build"
+            exit 0
+          fi
+
+          echo "full_build=false" >> "$GITHUB_OUTPUT"
+
+          # Detect individual project groups
+          detect_group() {
+            local name="$1"
+            shift
+            local found=false
+            for pattern in "$@"; do
+              if echo "$CHANGED" | grep -qE "$pattern"; then
+                found=true
+                break
+              fi
+            done
+            echo "$name=$found" >> "$GITHUB_OUTPUT"
+            echo "  $name=$found"
+          }
+
+          # Source projects — map paths to group names
+          # Dependencies are handled by building dependents when a dependency changes
+          detect_group "core" "^src/HVO\.Core/"
+          detect_group "core_generators" "^src/HVO\.Core\.SourceGenerators/"
+          detect_group "astronomy" "^src/HVO\.Astronomy/"
+          detect_group "astronomy_cfitsio" "^src/HVO\.Astronomy\.CFITSIO/"
+          detect_group "astronomy_theskyx" "^src/HVO\.Astronomy\.TheSkyX/"
+          detect_group "weather" "^src/HVO\.Weather/"
+          detect_group "weather_dvp" "^src/HVO\.Weather\.DavisVantagePro/"
+          detect_group "power" "^src/HVO\.Power\.OutbackMate/"
+          detect_group "nina" "^src/HVO\.NinaClient/"
+          detect_group "iot" "^src/HVO\.Iot\.Devices/"
+          detect_group "zwo" "^src/HVO\.ZWOOptical/"
+
+          # Also detect test-only changes (rebuild the test + its src project)
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Core\.Tests/"; then
+            echo "core=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Core\.SourceGenerators\.Tests/"; then
+            echo "core_generators=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Astronomy\.Tests/"; then
+            echo "astronomy=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Astronomy\.CFITSIO\.Tests/"; then
+            echo "astronomy_cfitsio=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Astronomy\.TheSkyX\.Tests/"; then
+            echo "astronomy_theskyx=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Weather\.Tests/"; then
+            echo "weather=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Weather\.DavisVantagePro\.Tests/"; then
+            echo "weather_dvp=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Power\.OutbackMate\.Tests/"; then
+            echo "power=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.NinaClient\.Tests/"; then
+            echo "nina=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/HVO\.Iot\.Devices\.Tests/"; then
+            echo "iot=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep -qE "^tests/\.editorconfig"; then
+            echo "full_build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ────────────────────────────────────────────────────
+  # Stage 2: Build & test only affected projects
+  # ────────────────────────────────────────────────────
   build:
     name: Build & Test
+    needs: changes
     runs-on: ubuntu-latest
 
     steps:
@@ -32,13 +158,125 @@ jobs:
             9.0.x
             ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
+      - name: Determine projects to build
+        id: projects
+        env:
+          FULL_BUILD: ${{ needs.changes.outputs.full_build }}
+          CORE: ${{ needs.changes.outputs.core }}
+          CORE_GEN: ${{ needs.changes.outputs.core_generators }}
+          ASTRO: ${{ needs.changes.outputs.astronomy }}
+          CFITSIO: ${{ needs.changes.outputs.astronomy_cfitsio }}
+          THESKYX: ${{ needs.changes.outputs.astronomy_theskyx }}
+          WEATHER: ${{ needs.changes.outputs.weather }}
+          WEATHER_DVP: ${{ needs.changes.outputs.weather_dvp }}
+          POWER: ${{ needs.changes.outputs.power }}
+          NINA: ${{ needs.changes.outputs.nina }}
+          IOT: ${{ needs.changes.outputs.iot }}
+          ZWO: ${{ needs.changes.outputs.zwo }}
+        run: |
+          BUILD_PROJECTS=""
+          TEST_PROJECTS=""
+
+          add_project() {
+            local src="$1"
+            local test="$2"
+            if [[ -n "$src" ]]; then BUILD_PROJECTS="$BUILD_PROJECTS $src"; fi
+            if [[ -n "$test" ]]; then TEST_PROJECTS="$TEST_PROJECTS $test"; fi
+          }
+
+          if [[ "$FULL_BUILD" == "true" ]]; then
+            echo "scope=full" >> "$GITHUB_OUTPUT"
+            echo "Full build — all projects"
+          else
+            echo "scope=incremental" >> "$GITHUB_OUTPUT"
+
+            # Core is a dependency of many projects — if it changes, rebuild dependents
+            if [[ "$CORE" == "true" ]]; then
+              add_project "src/HVO.Core/HVO.Core.csproj" "tests/HVO.Core.Tests/HVO.Core.Tests.csproj"
+              # Dependents of HVO.Core
+              add_project "src/HVO.Astronomy.CFITSIO/HVO.Astronomy.CFITSIO.csproj" "tests/HVO.Astronomy.CFITSIO.Tests/HVO.Astronomy.CFITSIO.Tests.csproj"
+              add_project "src/HVO.Iot.Devices/HVO.Iot.Devices.csproj" "tests/HVO.Iot.Devices.Tests/HVO.Iot.Devices.Tests.csproj"
+              add_project "src/HVO.NinaClient/HVO.NinaClient.csproj" "tests/HVO.NinaClient.Tests/HVO.NinaClient.Tests.csproj"
+              add_project "src/HVO.Weather.DavisVantagePro/HVO.Weather.DavisVantagePro.csproj" "tests/HVO.Weather.DavisVantagePro.Tests/HVO.Weather.DavisVantagePro.Tests.csproj"
+              add_project "src/HVO.Core.SourceGenerators/HVO.Core.SourceGenerators.csproj" "tests/HVO.Core.SourceGenerators.Tests/HVO.Core.SourceGenerators.Tests.csproj"
+            fi
+
+            if [[ "$CORE_GEN" == "true" ]]; then
+              add_project "src/HVO.Core.SourceGenerators/HVO.Core.SourceGenerators.csproj" "tests/HVO.Core.SourceGenerators.Tests/HVO.Core.SourceGenerators.Tests.csproj"
+              add_project "src/HVO.Core/HVO.Core.csproj" "tests/HVO.Core.Tests/HVO.Core.Tests.csproj"
+            fi
+
+            if [[ "$ASTRO" == "true" ]]; then
+              add_project "src/HVO.Astronomy/HVO.Astronomy.csproj" "tests/HVO.Astronomy.Tests/HVO.Astronomy.Tests.csproj"
+              # Dependent: TheSkyX → Astronomy
+              add_project "src/HVO.Astronomy.TheSkyX/HVO.Astronomy.TheSkyX.csproj" "tests/HVO.Astronomy.TheSkyX.Tests/HVO.Astronomy.TheSkyX.Tests.csproj"
+            fi
+
+            if [[ "$CFITSIO" == "true" ]]; then
+              add_project "src/HVO.Astronomy.CFITSIO/HVO.Astronomy.CFITSIO.csproj" "tests/HVO.Astronomy.CFITSIO.Tests/HVO.Astronomy.CFITSIO.Tests.csproj"
+              add_project "src/HVO.Astronomy.CFITSIO.NativeAssets/HVO.Astronomy.CFITSIO.NativeAssets.csproj" ""
+            fi
+
+            if [[ "$THESKYX" == "true" ]]; then
+              add_project "src/HVO.Astronomy.TheSkyX/HVO.Astronomy.TheSkyX.csproj" "tests/HVO.Astronomy.TheSkyX.Tests/HVO.Astronomy.TheSkyX.Tests.csproj"
+            fi
+
+            # Weather is a dependency of DavisVantagePro
+            if [[ "$WEATHER" == "true" ]]; then
+              add_project "src/HVO.Weather/HVO.Weather.csproj" "tests/HVO.Weather.Tests/HVO.Weather.Tests.csproj"
+              add_project "src/HVO.Weather.DavisVantagePro/HVO.Weather.DavisVantagePro.csproj" "tests/HVO.Weather.DavisVantagePro.Tests/HVO.Weather.DavisVantagePro.Tests.csproj"
+            fi
+
+            if [[ "$WEATHER_DVP" == "true" ]]; then
+              add_project "src/HVO.Weather.DavisVantagePro/HVO.Weather.DavisVantagePro.csproj" "tests/HVO.Weather.DavisVantagePro.Tests/HVO.Weather.DavisVantagePro.Tests.csproj"
+            fi
+
+            if [[ "$POWER" == "true" ]]; then
+              add_project "src/HVO.Power.OutbackMate/HVO.Power.OutbackMate.csproj" "tests/HVO.Power.OutbackMate.Tests/HVO.Power.OutbackMate.Tests.csproj"
+            fi
+
+            if [[ "$NINA" == "true" ]]; then
+              add_project "src/HVO.NinaClient/HVO.NinaClient.csproj" "tests/HVO.NinaClient.Tests/HVO.NinaClient.Tests.csproj"
+            fi
+
+            if [[ "$IOT" == "true" ]]; then
+              add_project "src/HVO.Iot.Devices/HVO.Iot.Devices.csproj" "tests/HVO.Iot.Devices.Tests/HVO.Iot.Devices.Tests.csproj"
+            fi
+
+            if [[ "$ZWO" == "true" ]]; then
+              add_project "src/HVO.ZWOOptical.ASISDK/HVO.ZWOOptical.ASISDK.csproj" ""
+            fi
+
+            # Deduplicate
+            BUILD_PROJECTS=$(echo "$BUILD_PROJECTS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+            TEST_PROJECTS=$(echo "$TEST_PROJECTS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          fi
+
+          echo "build_projects=$BUILD_PROJECTS" >> "$GITHUB_OUTPUT"
+          echo "test_projects=$TEST_PROJECTS" >> "$GITHUB_OUTPUT"
+
+          if [[ -z "$BUILD_PROJECTS" && "$FULL_BUILD" != "true" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No project changes detected — skipping build"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo ""
+          echo "Build projects: $BUILD_PROJECTS"
+          echo "Test projects:  $TEST_PROJECTS"
+
+      # ── Full build path ──
+      - name: Restore (full)
+        if: steps.projects.outputs.scope == 'full'
         run: dotnet restore
 
-      - name: Build
+      - name: Build (full)
+        if: steps.projects.outputs.scope == 'full'
         run: dotnet build --no-restore --configuration Release
 
-      - name: Test with coverage
+      - name: Test (full)
+        if: steps.projects.outputs.scope == 'full'
         run: |
           dotnet test HVO.SDK.sln \
             --no-build \
@@ -48,20 +286,65 @@ jobs:
             --results-directory ./TestResults \
             --logger "trx;LogFileName=test-results.trx"
 
+      # ── Incremental build path ──
+      - name: Restore (incremental)
+        if: steps.projects.outputs.scope == 'incremental' && steps.projects.outputs.skip != 'true'
+        run: |
+          for proj in ${{ steps.projects.outputs.build_projects }} ${{ steps.projects.outputs.test_projects }}; do
+            dotnet restore "$proj"
+          done
+
+      - name: Build (incremental)
+        if: steps.projects.outputs.scope == 'incremental' && steps.projects.outputs.skip != 'true'
+        run: |
+          for proj in ${{ steps.projects.outputs.build_projects }} ${{ steps.projects.outputs.test_projects }}; do
+            echo "Building $proj..."
+            dotnet build "$proj" --no-restore --configuration Release
+          done
+
+      - name: Test (incremental)
+        if: steps.projects.outputs.scope == 'incremental' && steps.projects.outputs.skip != 'true'
+        run: |
+          TEST_PROJECTS="${{ steps.projects.outputs.test_projects }}"
+          if [[ -z "$TEST_PROJECTS" ]]; then
+            echo "No test projects to run"
+            exit 0
+          fi
+          for proj in $TEST_PROJECTS; do
+            echo "Testing $proj..."
+            dotnet test "$proj" \
+              --no-build \
+              --configuration Release \
+              --settings tests/coverage.runsettings \
+              --collect:"XPlat Code Coverage" \
+              --results-directory ./TestResults \
+              --logger "trx;LogFileName=test-results.trx"
+          done
+
+      - name: Skip notification
+        if: steps.projects.outputs.skip == 'true'
+        run: |
+          echo "### No source projects changed" >> "$GITHUB_STEP_SUMMARY"
+          echo "Only non-project files were modified. Build and test skipped." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install ReportGenerator
-        if: always()
+        if: always() && steps.projects.outputs.skip != 'true'
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Generate coverage report
-        if: always()
+        if: always() && steps.projects.outputs.skip != 'true'
         run: |
-          reportgenerator \
-            -reports:"TestResults/**/coverage.cobertura.xml" \
-            -targetdir:"coverage-report" \
-            -reporttypes:"Html;TextSummary;MarkdownSummaryGithub;Badges;Cobertura"
+          if ls TestResults/**/coverage.cobertura.xml 1>/dev/null 2>&1; then
+            reportgenerator \
+              -reports:"TestResults/**/coverage.cobertura.xml" \
+              -targetdir:"coverage-report" \
+              -reporttypes:"Html;TextSummary;MarkdownSummaryGithub;Badges;Cobertura"
+          else
+            echo "No coverage files found — skipping report generation"
+          fi
 
       - name: Parse coverage and test results for badges
-        if: always()
+        if: always() && steps.projects.outputs.skip != 'true'
         id: coverage
         run: |
           LINE_COV=$(grep 'Line coverage' coverage-report/Summary.txt | grep -oP '[\d.]+(?=%)' || echo "0")
@@ -86,12 +369,17 @@ jobs:
           echo "| Branch coverage | ${BRANCH_COV}% |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Method coverage | ${METHOD_COV}% |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Tests | ${TESTS_PASSED} passed / ${TESTS_TOTAL} total |" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.projects.outputs.scope }}" == "incremental" ]]; then
+            echo "| Scope | Incremental — only affected projects |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Scope | Full — all projects |" >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "" >> "$GITHUB_STEP_SUMMARY"
           cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish test results
         uses: dorny/test-reporter@v2
-        if: always()
+        if: always() && steps.projects.outputs.skip != 'true'
         with:
           name: Test Results
           path: TestResults/test-results.trx
@@ -99,7 +387,7 @@ jobs:
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
-        if: always()
+        if: always() && steps.projects.outputs.skip != 'true'
         with:
           name: coverage-report
           path: coverage-report/
@@ -107,7 +395,7 @@ jobs:
 
       - name: Upload coverage badges
         uses: actions/upload-artifact@v7
-        if: always()
+        if: always() && steps.projects.outputs.skip != 'true'
         with:
           name: coverage-badges
           path: coverage-report/badge_*.svg
