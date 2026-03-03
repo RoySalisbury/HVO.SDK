@@ -1,5 +1,5 @@
 using System.Buffers;
-using System.Collections.Concurrent;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 
 namespace HVO.NinaClient.Infrastructure;
@@ -10,15 +10,16 @@ namespace HVO.NinaClient.Infrastructure;
 public sealed class BufferManager : IDisposable
 {
     private readonly ArrayPool<byte> _arrayPool;
-    private readonly ConcurrentBag<RentedBuffer> _rentedBuffers = new();
     private readonly ILogger<BufferManager>? _logger;
+    private int _totalRented;
+    private int _activeBuffers;
     private bool _disposed;
 
     public BufferManager(ILogger<BufferManager>? logger = null)
     {
         _arrayPool = ArrayPool<byte>.Shared;
         _logger = logger;
-        
+
         _logger?.LogTrace("BufferManager initialized with shared ArrayPool");
     }
 
@@ -34,10 +35,11 @@ public sealed class BufferManager : IDisposable
 
         var buffer = _arrayPool.Rent(minimumSize);
         var rentedBuffer = new RentedBuffer(buffer, minimumSize, this);
-        
-        _rentedBuffers.Add(rentedBuffer);
-        
-        _logger?.LogTrace("Rented buffer of size {ActualSize} (requested: {RequestedSize})", 
+
+        Interlocked.Increment(ref _totalRented);
+        Interlocked.Increment(ref _activeBuffers);
+
+        _logger?.LogTrace("Rented buffer of size {ActualSize} (requested: {RequestedSize})",
             buffer.Length, minimumSize);
 
         return rentedBuffer;
@@ -50,20 +52,25 @@ public sealed class BufferManager : IDisposable
     /// <param name="clearArray">Whether to clear the array</param>
     internal void ReturnBuffer(byte[] buffer, bool clearArray = true)
     {
-        if (_disposed)
-        {
-            _logger?.LogTrace("Buffer manager disposed, cannot return buffer");
-            return;
-        }
+        Interlocked.Decrement(ref _activeBuffers);
 
+        // Always return the buffer to the pool, even after disposal,
+        // to avoid leaking pooled arrays from outstanding RentedBuffers.
         try
         {
             _arrayPool.Return(buffer, clearArray);
-            _logger?.LogTrace("Returned buffer of size {Size} to pool", buffer.Length);
+
+            if (!_disposed)
+            {
+                _logger?.LogTrace("Returned buffer of size {Size} to pool", buffer.Length);
+            }
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Failed to return buffer to pool");
+            if (!_disposed)
+            {
+                _logger?.LogWarning(ex, "Failed to return buffer to pool");
+            }
         }
     }
 
@@ -73,14 +80,14 @@ public sealed class BufferManager : IDisposable
     /// <returns>Buffer usage statistics</returns>
     public BufferStatistics GetStatistics()
     {
-        var activeBuffers = _rentedBuffers.Count(b => !b.IsDisposed);
-        var totalRented = _rentedBuffers.Count;
+        var active = Interlocked.CompareExchange(ref _activeBuffers, 0, 0);
+        var total = Interlocked.CompareExchange(ref _totalRented, 0, 0);
 
         return new BufferStatistics
         {
-            ActiveBuffers = activeBuffers,
-            TotalRentedBuffers = totalRented,
-            DisposedBuffers = totalRented - activeBuffers
+            ActiveBuffers = active,
+            TotalRentedBuffers = total,
+            DisposedBuffers = total - active
         };
     }
 
@@ -97,7 +104,7 @@ public sealed class BufferManager : IDisposable
             _logger?.LogWarning("Disposing BufferManager with {ActiveBuffers} active buffers", stats.ActiveBuffers);
         }
 
-        _logger?.LogDebug("BufferManager disposed - Total rented: {Total}, Active: {Active}", 
+        _logger?.LogDebug("BufferManager disposed - Total rented: {Total}, Active: {Active}",
             stats.TotalRentedBuffers, stats.ActiveBuffers);
     }
 }

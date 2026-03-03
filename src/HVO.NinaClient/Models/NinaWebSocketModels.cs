@@ -2,41 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace HVO.NinaClient.Models;
 
-/// <summary>
-/// Configuration options for NINA WebSocket client
-/// </summary>
-public record NinaWebSocketOptions
-{
-    /// <summary>
-    /// The base URI for the NINA WebSocket server (default: ws://localhost:1888/v2)
-    /// </summary>
-    public string BaseUri { get; init; } = "ws://localhost:1888/v2";
-
-    /// <summary>
-    /// Connection timeout in milliseconds (default: 5000ms)
-    /// </summary>
-    public int ConnectionTimeoutMs { get; init; } = 5000;
-
-    /// <summary>
-    /// Keep-alive interval in milliseconds (default: 30000ms)
-    /// </summary>
-    public int KeepAliveIntervalMs { get; init; } = 30000;
-
-    /// <summary>
-    /// Buffer size for WebSocket messages (default: 4096 bytes)
-    /// </summary>
-    public int BufferSize { get; init; } = 4096;
-
-    /// <summary>
-    /// Maximum number of reconnection attempts (default: 5)
-    /// </summary>
-    public int MaxReconnectAttempts { get; init; } = 5;
-
-    /// <summary>
-    /// Delay between reconnection attempts in milliseconds (default: 2000ms)
-    /// </summary>
-    public int ReconnectDelayMs { get; init; } = 2000;
-}
+// NinaWebSocketOptions is defined in NinaWebSocketClient.cs (namespace HVO.NinaClient)
+// with full validation support. Do not duplicate here.
 
 /// <summary>
 /// NINA WebSocket event types
@@ -45,15 +12,15 @@ public enum NinaEventType
 {
     // API Events
     ApiCaptureFinished,
-    
+
     // Autofocus Events
     AutofocusFinished,
-    
+
     // Camera Events
     CameraConnected,
     CameraDisconnected,
     CameraDownloadTimeout,
-    
+
     // Dome Events
     DomeConnected,
     DomeDisconnected,
@@ -64,12 +31,12 @@ public enum NinaEventType
     DomeStopped,
     DomeSlewed,
     DomeSynced,
-    
+
     // Filter Wheel Events
     FilterWheelConnected,
     FilterWheelDisconnected,
     FilterWheelChanged,
-    
+
     // Flat Panel Events
     FlatConnected,
     FlatDisconnected,
@@ -77,19 +44,19 @@ public enum NinaEventType
     FlatCoverOpened,
     FlatCoverClosed,
     FlatBrightnessChanged,
-    
+
     // Focuser Events
     FocuserConnected,
     FocuserDisconnected,
     FocuserUserFocused,
-    
+
     // Guider Events
     GuiderConnected,
     GuiderDisconnected,
     GuiderStart,
     GuiderStop,
     GuiderDither,
-    
+
     // Mount Events
     MountConnected,
     MountDisconnected,
@@ -99,56 +66,56 @@ public enum NinaEventType
     MountParked,
     MountUnparked,
     MountCenter,
-    
+
     // Profile Events
     ProfileAdded,
     ProfileChanged,
     ProfileRemoved,
-    
+
     // Rotator Events
     RotatorConnected,
     RotatorDisconnected,
     RotatorSynced,
     RotatorMoved,
     RotatorMovedMechanical,
-    
+
     // Safety Events
     SafetyConnected,
     SafetyDisconnected,
     SafetyChanged,
-    
+
     // Sequence Events
     SequenceStarting,
     SequenceFinished,
     SequenceEntityFailed,
-    
+
     // Switch Events
     SwitchConnected,
     SwitchDisconnected,
-    
+
     // Weather Events
     WeatherConnected,
     WeatherDisconnected,
-    
+
     // Advanced Sequence Events
     AdvSeqStart,
     AdvSeqStop,
-    
+
     // Error Events
     ErrorAf,
     ErrorPlatesolve,
-    
+
     // Image Events
     ImageSave,
-    
+
     // Stack Events
     StackUpdated,
-    
+
     // Target Scheduler Events
     TsWaitStart,
     TsNewTargetStart,
     TsTargetStart,
-    
+
     // General Events
     Unknown
 }

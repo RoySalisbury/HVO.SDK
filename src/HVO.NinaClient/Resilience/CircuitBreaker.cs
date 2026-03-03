@@ -22,10 +22,11 @@ public sealed class CircuitBreaker : IDisposable
     private readonly TimeSpan _timeout;
     private readonly ILogger? _logger;
     private readonly object _lock = new();
-    
+
     private CircuitBreakerState _state = CircuitBreakerState.Closed;
     private int _failureCount = 0;
     private DateTime _nextAttempt = DateTime.MinValue;
+    private int _halfOpenProbeActive = 0; // Interlocked guard: only one probe in HALF-OPEN
     private bool _disposed;
 
     public CircuitBreaker(int failureThreshold, TimeSpan timeout, ILogger? logger = null)
@@ -33,8 +34,8 @@ public sealed class CircuitBreaker : IDisposable
         _failureThreshold = failureThreshold;
         _timeout = timeout;
         _logger = logger;
-        
-        _logger?.LogDebug("Circuit breaker initialized - FailureThreshold: {FailureThreshold}, Timeout: {Timeout}", 
+
+        _logger?.LogDebug("Circuit breaker initialized - FailureThreshold: {FailureThreshold}, Timeout: {Timeout}",
             failureThreshold, timeout);
     }
 
@@ -72,7 +73,7 @@ public sealed class CircuitBreaker : IDisposable
     /// Circuit Breaker State Machine:
     /// - CLOSED: Normal operation, all calls proceed
     /// - OPEN: Service is failing, fail fast without calling operation  
-    /// - HALF-OPEN: Testing if service has recovered, allow one call through
+    /// - HALF-OPEN: Testing if service has recovered, allow exactly one probe call through
     /// </summary>
     /// <typeparam name="T">Return type</typeparam>
     /// <param name="operation">Operation to execute</param>
@@ -82,6 +83,8 @@ public sealed class CircuitBreaker : IDisposable
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(CircuitBreaker));
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         // Check current circuit breaker state and decide whether to proceed
         lock (_lock)
@@ -97,15 +100,21 @@ public sealed class CircuitBreaker : IDisposable
                         _logger?.LogDebug("Circuit breaker is open, failing fast");
                         return Result<T>.Failure(new InvalidOperationException("Circuit breaker is open"));
                     }
-                    
+
                     // Timeout period has elapsed - transition to half-open to test if service recovered
                     _state = CircuitBreakerState.HalfOpen;
+                    Interlocked.Exchange(ref _halfOpenProbeActive, 0);
                     _logger?.LogInformation("Circuit breaker transitioning from Open to HalfOpen");
                     break;
 
                 case CircuitBreakerState.HalfOpen:
-                    // Testing recovery - allow this operation to proceed
-                    // Success will close the circuit, failure will re-open it
+                    // Only allow one probe through in half-open state;
+                    // reject concurrent callers to avoid overloading a recovering dependency
+                    if (Interlocked.CompareExchange(ref _halfOpenProbeActive, 1, 0) != 0)
+                    {
+                        _logger?.LogDebug("Circuit breaker is half-open with active probe, failing fast");
+                        return Result<T>.Failure(new InvalidOperationException("Circuit breaker is half-open, probe already in progress"));
+                    }
                     break;
 
                 case CircuitBreakerState.Closed:
@@ -148,7 +157,7 @@ public sealed class CircuitBreaker : IDisposable
         {
             // Reset failure count on any successful operation
             _failureCount = 0;
-            
+
             // If we were in half-open state (testing recovery), close the circuit
             if (_state == CircuitBreakerState.HalfOpen)
             {
@@ -175,7 +184,7 @@ public sealed class CircuitBreaker : IDisposable
                 // Open the circuit - future calls will fail fast until timeout expires
                 _state = CircuitBreakerState.Open;
                 _nextAttempt = DateTime.UtcNow.Add(_timeout); // Set when we can test recovery
-                _logger?.LogError("Circuit breaker opened after {FailureCount} failures. Next attempt at {NextAttempt}", 
+                _logger?.LogError("Circuit breaker opened after {FailureCount} failures. Next attempt at {NextAttempt}",
                     _failureCount, _nextAttempt);
             }
         }
@@ -228,7 +237,7 @@ public static class RetryPolicy
             {
                 // Execute the operation
                 var result = await operation();
-                
+
                 if (result.IsSuccessful)
                 {
                     // Operation succeeded
@@ -241,7 +250,7 @@ public static class RetryPolicy
 
                 // Operation failed - check if we should retry
                 lastException = result.Error;
-                
+
                 if (ShouldRetry(result.Error, attempt, maxAttempts))
                 {
                     // Wait with exponential backoff before next attempt
@@ -249,7 +258,7 @@ public static class RetryPolicy
                     attempt++;
                     continue;
                 }
-                
+
                 // Don't retry this error - return failure immediately
                 return result;
             }
@@ -313,7 +322,7 @@ public static class RetryPolicy
             Random.Shared.Next(0, 1000));                        // Jitter component
 
         logger?.LogDebug("Retrying operation in {Delay}ms (attempt {Attempt})", delay.TotalMilliseconds, attempt + 1);
-        
+
         await Task.Delay(delay, cancellationToken);
     }
 }

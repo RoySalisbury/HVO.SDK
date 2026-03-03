@@ -213,7 +213,7 @@ internal class ValidateNinaApiClientOptions : IValidateOptions<NinaApiClientOpti
                 return ValidateOptionsResult.Success;
             }
 
-            var errorMessage = validationResult.ErrorMessage ?? "Unknown validation error";
+            var errorMessage = validationResult?.ErrorMessage ?? "Unknown validation error";
             _logger.LogError("NINA API client configuration validation failed: {Error}", errorMessage);
             return ValidateOptionsResult.Fail(errorMessage);
         }
@@ -248,7 +248,7 @@ internal class ValidateNinaWebSocketOptions : IValidateOptions<NinaWebSocketOpti
                 return ValidateOptionsResult.Success;
             }
 
-            var errorMessage = validationResult.ErrorMessage ?? "Unknown validation error";
+            var errorMessage = validationResult?.ErrorMessage ?? "Unknown validation error";
             _logger.LogError("NINA WebSocket client configuration validation failed: {Error}", errorMessage);
             return ValidateOptionsResult.Fail(errorMessage);
         }

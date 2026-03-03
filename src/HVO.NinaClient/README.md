@@ -137,7 +137,8 @@ public class TelescopeController : ControllerBase
             var filterResult = await _ninaClient.ChangeFilterAsync(request.FilterName);
             if (!filterResult.IsSuccess)
             {
-                return BadRequest($"Failed to change filter: {filterResult.Exception.Message}");
+                _logger.LogError(filterResult.Exception, "Failed to change filter to {Filter}", request.FilterName);
+                return BadRequest("Failed to change filter");
             }
         }
 
@@ -145,7 +146,8 @@ public class TelescopeController : ControllerBase
         var imageResult = await _ninaClient.CaptureImageAsync(request.ExposureTime, request.FilterName);
         if (!imageResult.IsSuccess)
         {
-            return StatusCode(500, $"Image capture failed: {imageResult.Exception.Message}");
+            _logger.LogError(imageResult.Exception, "Image capture failed");
+            return StatusCode(500, "Image capture failed");
         }
 
         return Ok(imageResult.Value);
@@ -161,7 +163,8 @@ public class TelescopeController : ControllerBase
             return Ok("Slew started successfully");
         }
         
-        return StatusCode(500, $"Slew failed: {result.Exception.Message}");
+        _logger.LogError(result.Exception, "Slew to RA={RA}, Dec={Dec} failed", request.RightAscension, request.Declination);
+        return StatusCode(500, "Slew failed");
     }
 }
 
@@ -278,9 +281,7 @@ public class ImagingService
 ### WebSocket - Real-time Event Monitoring
 
 ```csharp
-public class ObservatoryService
-
-// Or register just the WebSocket client
+// Register the WebSocket client in DI
 services.AddNinaWebSocketClient(configuration);
 
 // Or with explicit options
@@ -606,7 +607,7 @@ This client integrates seamlessly with the HVOv9 observatory automation system:
 
 ## Requirements
 
-- .NET 9.0+
+- .NET 8.0+
 - NINA with Advanced API plugin installed and configured
 - Network connectivity to NINA WebSocket server (default: ws://localhost:1888/v2)
 
@@ -618,8 +619,8 @@ This client integrates seamlessly with the HVOv9 observatory automation system:
 - Microsoft.Extensions.Http
 - Microsoft.Extensions.Configuration.Abstractions
 - System.Text.Json
-- HVO (for Result<T> pattern)
+- HVO.Core (for Result<T> pattern)
 
 ## License
 
-Part of the HVOv9 (Hualapai Valley Observatory v9) project.
+Part of the HVO.SDK (Hualapai Valley Observatory) project.

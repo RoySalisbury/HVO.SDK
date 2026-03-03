@@ -30,18 +30,18 @@ public interface INinaApiClient
     Task<Result<string>> SetCameraDewHeaterAsync(bool power, CancellationToken cancellationToken = default);
     Task<Result<string>> SetCameraBinningAsync(string binning, CancellationToken cancellationToken = default);
     Task<Result<CaptureResponseOrString>> CaptureAsync(
-        bool? solve = null, 
-        double? duration = null, 
-        int? gain = null, 
+        bool? solve = null,
+        double? duration = null,
+        int? gain = null,
         int? getResult = null,
-        bool? resize = null, 
-        int? quality = null, 
-        string? size = null, 
-        double? scale = null, 
-        bool? stream = null, 
-        bool? omitImage = null, 
-        bool? waitForResult = null, 
-        bool? save = null, 
+        bool? resize = null,
+        int? quality = null,
+        string? size = null,
+        double? scale = null,
+        bool? stream = null,
+        bool? omitImage = null,
+        bool? waitForResult = null,
+        bool? save = null,
         CancellationToken cancellationToken = default);
     Task<Result<string>> AbortCameraExposureAsync(CancellationToken cancellationToken = default);
     Task<Result<ImageStatistics>> GetCameraStatisticsAsync(CancellationToken cancellationToken = default);
@@ -224,7 +224,7 @@ public interface INinaApiClient
     Task<Result<GuideStepsHistory>> GetGuiderGraphAsync(CancellationToken cancellationToken = default);
 
     #region Image Methods
-    
+
     /// <summary>
     /// Gets an image by index from the image history
     /// </summary>
@@ -713,11 +713,11 @@ public interface INinaApiClient
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The result containing the set target operation status</returns>
     Task<Result<string>> SetSequenceTargetAsync(
-        string name, 
-        double ra, 
-        double dec, 
-        double rotation, 
-        int index, 
+        string name,
+        double ra,
+        double dec,
+        double rotation,
+        int index,
         CancellationToken cancellationToken = default);
 
     /// <summary>

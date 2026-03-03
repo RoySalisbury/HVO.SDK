@@ -54,7 +54,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
                 _options.CircuitBreakerFailureThreshold,              // How many failures before opening (e.g., 5)
                 TimeSpan.FromSeconds(_options.CircuitBreakerTimeoutSeconds), // How long to stay open (e.g., 30s)
                 logger);                                              // Logger for circuit breaker state changes
-                
+
             _logger.LogInformation("Circuit breaker enabled - FailureThreshold: {FailureThreshold}, Timeout: {Timeout}s",
                 _options.CircuitBreakerFailureThreshold, _options.CircuitBreakerTimeoutSeconds);
         }
@@ -69,14 +69,14 @@ public class NinaApiClient : INinaApiClient, IDisposable
     {
         _httpClient.BaseAddress = new Uri(_options.BaseUrl);
         _httpClient.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
-        
+
         // Add authentication headers if configured
         if (!string.IsNullOrEmpty(_options.ApiKey))
         {
             _httpClient.DefaultRequestHeaders.Add("X-API-Key", _options.ApiKey);
         }
 
-        _logger.LogInformation("NINA API client configured - BaseUrl: {BaseUrl}, Timeout: {Timeout}s, CircuitBreaker: {CircuitBreakerEnabled}", 
+        _logger.LogInformation("NINA API client configured - BaseUrl: {BaseUrl}, Timeout: {Timeout}s, CircuitBreaker: {CircuitBreakerEnabled}",
             _options.BaseUrl, _options.TimeoutSeconds, _options.EnableCircuitBreaker);
     }
 
@@ -97,7 +97,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> SwitchTabAsync(string tab, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Switching to application tab: {Tab}", tab);
-        
+
         var endpoint = $"/v2/api/application/switch-tab?tab={Uri.EscapeDataString(tab)}";
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
@@ -118,14 +118,14 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<IReadOnlyList<LogEntry>>> GetApplicationLogsAsync(int lineCount, string? level = null, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Getting application logs - LineCount: {LineCount}, Level: {Level}", lineCount, level);
-        
+
         var queryParams = new List<string> { $"lineCount={lineCount}" };
-        
+
         if (!string.IsNullOrEmpty(level))
         {
             queryParams.Add($"level={Uri.EscapeDataString(level)}");
         }
-        
+
         var endpoint = "/v2/api/application/logs?" + string.Join("&", queryParams);
         // Now GetAsync<IReadOnlyList<T>> automatically handles the conversion from List<T>
         return await ExecuteWithResilienceAsync(() => GetAsync<IReadOnlyList<LogEntry>>(endpoint, cancellationToken));
@@ -146,23 +146,23 @@ public class NinaApiClient : INinaApiClient, IDisposable
         bool? stream = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Taking application screenshot - Resize: {Resize}, Quality: {Quality}, Size: {Size}, Scale: {Scale}, Stream: {Stream}", 
+        _logger.LogInformation("Taking application screenshot - Resize: {Resize}, Quality: {Quality}, Size: {Size}, Scale: {Scale}, Stream: {Stream}",
             resize, quality, size, scale, stream);
 
         var queryParams = new List<string>();
-        
+
         if (resize.HasValue)
             queryParams.Add($"resize={resize.Value.ToString().ToLower()}");
-            
+
         if (quality.HasValue)
             queryParams.Add($"quality={quality.Value}");
-            
+
         if (!string.IsNullOrEmpty(size))
             queryParams.Add($"size={Uri.EscapeDataString(size)}");
-            
+
         if (scale.HasValue)
             queryParams.Add($"scale={scale.Value}");
-            
+
         if (stream.HasValue)
             queryParams.Add($"stream={stream.Value.ToString().ToLower()}");
 
@@ -223,13 +223,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectCameraAsync(string? deviceId = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to camera device: {DeviceId}", deviceId ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/camera/connect";
         if (!string.IsNullOrEmpty(deviceId))
         {
             endpoint += $"?to={Uri.EscapeDataString(deviceId)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -268,7 +268,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> CoolCameraAsync(double temperature, double minutes, bool? cancel = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Cooling camera to {Temperature}°C for {Minutes} minutes, Cancel: {Cancel}", temperature, minutes, cancel);
-        
+
         var queryParams = new List<string>
         {
             $"temperature={temperature}",
@@ -292,7 +292,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> WarmCameraAsync(double minutes, bool? cancel = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Warming camera for {Minutes} minutes, Cancel: {Cancel}", minutes, cancel);
-        
+
         var queryParams = new List<string> { $"minutes={minutes}" };
 
         if (cancel.HasValue)
@@ -360,44 +360,44 @@ public class NinaApiClient : INinaApiClient, IDisposable
         bool? save = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting camera capture - Duration: {Duration}s, Gain: {Gain}, WaitForResult: {WaitForResult}", 
+        _logger.LogInformation("Starting camera capture - Duration: {Duration}s, Gain: {Gain}, WaitForResult: {WaitForResult}",
             duration, gain, waitForResult);
 
         var queryParams = new List<string>();
 
         if (solve.HasValue)
             queryParams.Add($"solve={solve.Value.ToString().ToLower()}");
-        
+
         if (duration.HasValue)
             queryParams.Add($"duration={duration.Value}");
-        
+
         if (gain.HasValue)
             queryParams.Add($"gain={gain.Value}");
-            
+
         if (getResult.HasValue)
             queryParams.Add($"getResult={getResult.Value.ToString().ToLower()}");
-        
+
         if (resize.HasValue)
             queryParams.Add($"resize={resize.Value.ToString().ToLower()}");
-        
+
         if (quality.HasValue)
             queryParams.Add($"quality={quality.Value}");
-        
+
         if (!string.IsNullOrEmpty(size))
             queryParams.Add($"size={Uri.EscapeDataString(size)}");
-        
+
         if (scale.HasValue)
             queryParams.Add($"scale={scale.Value}");
-        
+
         if (stream.HasValue)
             queryParams.Add($"stream={stream.Value.ToString().ToLower()}");
-        
+
         if (omitImage.HasValue)
             queryParams.Add($"omitImage={omitImage.Value.ToString().ToLower()}");
-        
+
         if (waitForResult.HasValue)
             queryParams.Add($"waitForResult={waitForResult.Value.ToString().ToLower()}");
-        
+
         if (save.HasValue)
             queryParams.Add($"save={save.Value.ToString().ToLower()}");
 
@@ -480,13 +480,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectDomeAsync(string? deviceId = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to dome device: {DeviceId}", deviceId ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/dome/connect";
         if (!string.IsNullOrEmpty(deviceId))
         {
             endpoint += $"?to={Uri.EscapeDataString(deviceId)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -568,9 +568,9 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> SlewDomeAsync(double azimuth, bool? waitToFinish = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Slewing dome to azimuth: {Azimuth}°, WaitToFinish: {WaitToFinish}", azimuth, waitToFinish);
-        
+
         var queryParams = new List<string> { $"azimuth={azimuth}" };
-        
+
         if (waitToFinish.HasValue)
             queryParams.Add($"waitToFinish={waitToFinish.Value.ToString().ToLower()}");
 
@@ -659,13 +659,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectFilterWheelAsync(string? deviceId = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to filter wheel device: {DeviceId}", deviceId ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/filterwheel/connect";
         if (!string.IsNullOrEmpty(deviceId))
         {
             endpoint += $"?to={Uri.EscapeDataString(deviceId)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -754,13 +754,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectFlatDeviceAsync(string? deviceId = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to flat device device: {DeviceId}", deviceId ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/flatdevice/connect";
         if (!string.IsNullOrEmpty(deviceId))
         {
             endpoint += $"?to={Uri.EscapeDataString(deviceId)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -862,13 +862,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectFocuserAsync(string? deviceId = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to focuser device: {DeviceId}", deviceId ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/focuser/connect";
         if (!string.IsNullOrEmpty(deviceId))
         {
             endpoint += $"?to={Uri.EscapeDataString(deviceId)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -905,13 +905,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> AutoFocusAsync(bool? cancel = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Starting autofocus operation - Cancel: {Cancel}", cancel);
-        
+
         var endpoint = "/v2/api/equipment/focuser/auto-focus";
         if (cancel.HasValue)
         {
             endpoint += $"?cancel={cancel.Value.ToString().ToLower()}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -959,7 +959,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
         int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting sky flat capture - Count: {Count}, MinExposure: {MinExposure}s, MaxExposure: {MaxExposure}s", 
+        _logger.LogInformation("Starting sky flat capture - Count: {Count}, MinExposure: {MinExposure}s, MaxExposure: {MaxExposure}s",
             count, minExposure, maxExposure);
 
         var queryParams = new List<string> { $"count={count}" };
@@ -1027,11 +1027,11 @@ public class NinaApiClient : INinaApiClient, IDisposable
         bool? keepClosed = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting auto brightness flat capture - Count: {Count}, ExposureTime: {ExposureTime}s", 
+        _logger.LogInformation("Starting auto brightness flat capture - Count: {Count}, ExposureTime: {ExposureTime}s",
             count, exposureTime);
 
-        var queryParams = new List<string> 
-        { 
+        var queryParams = new List<string>
+        {
             $"count={count}",
             $"exposureTime={exposureTime}"
         };
@@ -1099,11 +1099,11 @@ public class NinaApiClient : INinaApiClient, IDisposable
         bool? keepClosed = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting auto exposure flat capture - Count: {Count}, Brightness: {Brightness}", 
+        _logger.LogInformation("Starting auto exposure flat capture - Count: {Count}, Brightness: {Brightness}",
             count, brightness);
 
-        var queryParams = new List<string> 
-        { 
+        var queryParams = new List<string>
+        {
             $"count={count}",
             $"brightness={brightness}"
         };
@@ -1300,13 +1300,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> SlewFramingAssistantAsync(string? option = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Slewing mount using framing assistant - Option: {Option}", option ?? "default");
-        
+
         var endpoint = "/v2/api/framing/slew";
         if (!string.IsNullOrEmpty(option))
         {
             endpoint += $"?option={Uri.EscapeDataString(option)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -1382,13 +1382,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectGuiderAsync(string? to = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to guider device - DeviceId: {DeviceId}", to ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/guider/connect";
         if (!string.IsNullOrEmpty(to))
         {
             endpoint += $"?to={Uri.EscapeDataString(to)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -1412,13 +1412,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> StartGuidingAsync(bool? calibrate = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Starting guiding - Calibrate: {Calibrate}", calibrate?.ToString() ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/guider/start";
         if (calibrate.HasValue)
         {
             endpoint += $"?calibrate={calibrate.Value.ToString().ToLowerInvariant()}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -1528,14 +1528,14 @@ public class NinaApiClient : INinaApiClient, IDisposable
     }
 
     /// <summary>
-/// Gets image history. Only one parameter is required
-/// </summary>
-/// <param name="all">Whether to get all images or only the current image</param>
-/// <param name="index">The index of the image to get</param>
-/// <param name="count">Whether to count the number of images</param>
-/// <param name="imageType">Filter by image type. This will restrict the result to images of the specified type</param>
-/// <param name="cancellationToken">Cancellation token</param>
-/// <returns>The result containing image history data or count</returns>
+    /// Gets image history. Only one parameter is required
+    /// </summary>
+    /// <param name="all">Whether to get all images or only the current image</param>
+    /// <param name="index">The index of the image to get</param>
+    /// <param name="count">Whether to count the number of images</param>
+    /// <param name="imageType">Filter by image type. This will restrict the result to images of the specified type</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The result containing image history data or count</returns>
     public async Task<Result<ImageHistoryResponse>> GetImageHistoryAsync(
         bool? all = null,
         int? index = null,
@@ -1543,7 +1543,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
         ImageType? imageType = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Getting image history - All: {All}, Index: {Index}, Count: {Count}, ImageType: {ImageType}", 
+        _logger.LogDebug("Getting image history - All: {All}, Index: {Index}, Count: {Count}, ImageType: {ImageType}",
             all, index, count, imageType);
 
         var queryParams = new List<string>();
@@ -1609,13 +1609,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
             _logger.LogTrace("GET request to {Endpoint} for binary thumbnail data", endpoint);
 
             var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogError("GET request failed - Endpoint: {Endpoint}, Status: {StatusCode}, Content: {Content}", 
+                _logger.LogError("GET request failed - Endpoint: {Endpoint}, Status: {StatusCode}, Content: {Content}",
                     endpoint, response.StatusCode, content);
-                
+
                 // Use the same exception mapping as other methods for consistency
                 var httpException = NinaApiExceptionMapper.MapHttpStatusToException(
                     response.StatusCode, content, endpoint);
@@ -1624,7 +1624,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
 
             // For binary data (thumbnails), read directly as byte array
             var thumbnailData = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-            
+
             // Validate that we actually received data
             if (thumbnailData == null || thumbnailData.Length == 0)
             {
@@ -1632,8 +1632,8 @@ public class NinaApiClient : INinaApiClient, IDisposable
                 var emptyDataException = new NinaApiLogicalException("API returned empty thumbnail data", endpoint);
                 return Result<byte[]>.Failure(emptyDataException);
             }
-            
-            _logger.LogTrace("Successfully retrieved {ByteCount} bytes of thumbnail data from {Endpoint}", 
+
+            _logger.LogTrace("Successfully retrieved {ByteCount} bytes of thumbnail data from {Endpoint}",
                 thumbnailData.Length, endpoint);
             return Result<byte[]>.Success(thumbnailData);
         }
@@ -1714,13 +1714,13 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> ConnectMountAsync(string? deviceId = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Connecting to mount device: {DeviceId}", deviceId ?? "default");
-        
+
         var endpoint = "/v2/api/equipment/mount/connect";
         if (!string.IsNullOrEmpty(deviceId))
         {
             endpoint += $"?to={Uri.EscapeDataString(deviceId)}";
         }
-        
+
         return await ExecuteWithResilienceAsync(() => GetAsync<string>(endpoint, cancellationToken));
     }
 
@@ -2126,7 +2126,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public async Task<Result<string>> SetSwitchValueAsync(int index, double value, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Setting switch value - Index: {Index}, Value: {Value}", index, value);
-        
+
         var queryParams = new List<string>
         {
             $"index={index}",
@@ -2409,14 +2409,14 @@ public class NinaApiClient : INinaApiClient, IDisposable
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The result containing the set target operation status</returns>
     public async Task<Result<string>> SetSequenceTargetAsync(
-        string name, 
-        double ra, 
-        double dec, 
-        double rotation, 
-        int index, 
+        string name,
+        double ra,
+        double dec,
+        double rotation,
+        int index,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Setting sequence target - Name: {Name}, RA: {RA}, DEC: {DEC}, Rotation: {Rotation}, Index: {Index}", 
+        _logger.LogInformation("Setting sequence target - Name: {Name}, RA: {RA}, DEC: {DEC}, Rotation: {Rotation}, Index: {Index}",
             name, ra, dec, rotation, index);
 
         var queryParams = new List<string>
@@ -2462,15 +2462,15 @@ public class NinaApiClient : INinaApiClient, IDisposable
             try
             {
                 var httpContent = new StringContent(sequenceJson, System.Text.Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PostAsync("/v2/api/sequence/load", httpContent, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogError("LoadSequenceFromJsonAsync failed with status code: {StatusCode}, Response: {Response}", 
+                    _logger.LogError("LoadSequenceFromJsonAsync failed with status code: {StatusCode}, Response: {Response}",
                         response.StatusCode, responseContent);
-                    
+
                     // Use the same exception mapping as other methods for consistency
                     var httpException = NinaApiExceptionMapper.MapHttpStatusToException(
                         response.StatusCode, responseContent, "/v2/api/sequence/load");
@@ -2488,7 +2488,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
                     {
                         var errorMessage = string.IsNullOrEmpty(ninaResponse?.Error) ? "Unknown error from API" : ninaResponse.Error;
                         _logger.LogWarning("API returned error response: {Error}", errorMessage);
-                        
+
                         var logicalException = NinaApiExceptionMapper.MapApiErrorToException(errorMessage, "/v2/api/sequence/load");
                         return Result<string>.Failure(logicalException);
                     }
@@ -2641,6 +2641,17 @@ public class NinaApiClient : INinaApiClient, IDisposable
         return retryResult;
     }
 
+    /// <summary>
+    /// Sends a GET request to the specified endpoint and deserializes the JSON "Response"
+    /// property to type <typeparamref name="T"/>.
+    /// 
+    /// NOTE: This method always extracts and deserializes the inner "Response" payload from
+    /// the NINA API envelope. When <typeparamref name="T"/> is a wrapper type such as
+    /// <c>NinaApiResponse&lt;TInner&gt;</c>, the inner payload (not the full envelope) is
+    /// deserialized into <typeparamref name="T"/>. This works because the wrapper types
+    /// inherit from <c>NinaApiResponse&lt;T&gt;</c> which has a <c>Response</c> property
+    /// that maps to the inner data. The pattern was validated in the original HVOv9 codebase.
+    /// </summary>
     private async Task<Result<T>> GetAsync<T>(string endpoint, CancellationToken cancellationToken = default)
         where T : class
     {
@@ -2653,9 +2664,9 @@ public class NinaApiClient : INinaApiClient, IDisposable
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("GET request failed - Endpoint: {Endpoint}, Status: {StatusCode}, Content: {Content}", 
+                _logger.LogError("GET request failed - Endpoint: {Endpoint}, Status: {StatusCode}, Content: {Content}",
                     endpoint, response.StatusCode, content);
-                
+
                 var httpException = NinaApiExceptionMapper.MapHttpStatusToException(
                     response.StatusCode, content, endpoint);
                 return Result<T>.Failure(httpException);
@@ -2663,18 +2674,18 @@ public class NinaApiClient : INinaApiClient, IDisposable
 
             // Determine the actual type to deserialize based on the requested type T
             var deserializationType = GetDeserializationType<T>();
-            
+
             // Deserialize to the appropriate type
             var jsonDocument = JsonDocument.Parse(content);
             var responseElement = jsonDocument.RootElement.GetProperty("Response");
             var successElement = jsonDocument.RootElement.TryGetProperty("Success", out var success) ? success : default;
             var errorElement = jsonDocument.RootElement.TryGetProperty("Error", out var error) ? error : default;
-            
+
             if (successElement.ValueKind != JsonValueKind.Undefined && !successElement.GetBoolean())
             {
                 var apiError = errorElement.ValueKind != JsonValueKind.Undefined ? errorElement.GetString() : "Unknown API error";
                 _logger.LogWarning("API returned error response: {Error}", apiError);
-                
+
                 var logicalException = NinaApiExceptionMapper.MapApiErrorToException(apiError ?? "Unknown API error", endpoint);
                 return Result<T>.Failure(logicalException);
             }
@@ -2688,7 +2699,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
 
             // Deserialize to the intermediate type
             var deserializedData = JsonSerializer.Deserialize(responseElement.GetRawText(), deserializationType, _jsonOptions);
-            
+
             if (deserializedData == null)
             {
                 _logger.LogWarning("Failed to deserialize response data for {Endpoint}", endpoint);
@@ -2698,7 +2709,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
 
             // Convert to the requested type T
             var convertedData = ConvertToRequestedType<T>(deserializedData);
-            
+
             _logger.LogTrace("Successfully retrieved data from {Endpoint}", endpoint);
             return Result<T>.Success(convertedData);
         }
@@ -2734,14 +2745,14 @@ public class NinaApiClient : INinaApiClient, IDisposable
     private static Type GetDeserializationType<T>()
     {
         var requestedType = typeof(T);
-        
+
         // If T is IReadOnlyList<TElement>, we need to deserialize to List<TElement>
         if (requestedType.IsGenericType && requestedType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>))
         {
             var elementType = requestedType.GetGenericArguments()[0];
             return typeof(List<>).MakeGenericType(elementType);
         }
-        
+
         // For other types, deserialize to the requested type directly
         return requestedType;
     }
@@ -2752,7 +2763,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
     private static T ConvertToRequestedType<T>(object deserializedData) where T : class
     {
         var requestedType = typeof(T);
-        
+
         // If T is IReadOnlyList<TElement> and data is List<TElement>, convert to ReadOnlyCollection
         if (requestedType.IsGenericType && requestedType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>))
         {
@@ -2764,7 +2775,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
                 return (T)readOnlyList!;
             }
         }
-        
+
         // For other types, return as-is (already the correct type)
         return (T)deserializedData;
     }
@@ -2776,7 +2787,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
     public NinaClientDiagnostics GetDiagnostics()
     {
         var bufferStats = _bufferManager.GetStatistics();
-        
+
         return new NinaClientDiagnostics
         {
             IsDisposed = _disposed,
@@ -2803,7 +2814,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
             _circuitBreaker?.Dispose();
             _bufferManager?.Dispose();
             _httpClient?.Dispose();
-            
+
             _logger.LogDebug("NinaApiClient disposed successfully");
         }
         catch (Exception ex)

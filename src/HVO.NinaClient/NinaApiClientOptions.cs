@@ -57,8 +57,8 @@ public class NinaApiClientOptions
     /// <summary>
     /// Validates the configuration options
     /// </summary>
-    /// <returns>Validation result</returns>
-    public ValidationResult Validate()
+    /// <returns>Validation result, or null on success (matching <see cref="ValidationResult.Success"/> convention)</returns>
+    public ValidationResult? Validate()
     {
         var context = new ValidationContext(this);
         var results = new List<ValidationResult>();
@@ -81,7 +81,7 @@ public class NinaApiClientOptions
             return new ValidationResult($"BaseUrl scheme must be http or https, got: {uri.Scheme}");
         }
 
-        return ValidationResult.Success!;
+        return ValidationResult.Success;
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public class NinaApiClientOptions
         var result = Validate();
         if (result != ValidationResult.Success)
         {
-            throw new ArgumentException(result.ErrorMessage, nameof(NinaApiClientOptions));
+            throw new ArgumentException(result?.ErrorMessage ?? "Validation failed", nameof(NinaApiClientOptions));
         }
     }
 }

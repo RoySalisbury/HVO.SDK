@@ -181,12 +181,12 @@ public record NinaWebSocketOptions
     /// <summary>
     /// Validates the configuration options
     /// </summary>
-    /// <returns>Validation result</returns>
-    public ValidationResult Validate()
+    /// <returns>Validation result, or null on success (matching <see cref="ValidationResult.Success"/> convention)</returns>
+    public ValidationResult? Validate()
     {
         var context = new ValidationContext(this);
         var results = new List<ValidationResult>();
-        
+
         if (!Validator.TryValidateObject(this, context, results, true))
         {
             var errors = string.Join("; ", results.Select(r => r.ErrorMessage));
@@ -205,7 +205,7 @@ public record NinaWebSocketOptions
             return new ValidationResult($"BaseUri scheme must be ws or wss, got: {uri.Scheme}");
         }
 
-        return ValidationResult.Success!;
+        return ValidationResult.Success;
     }
 
     /// <summary>
@@ -217,7 +217,7 @@ public record NinaWebSocketOptions
         var result = Validate();
         if (result != ValidationResult.Success)
         {
-            throw new ArgumentException(result.ErrorMessage, nameof(NinaWebSocketOptions));
+            throw new ArgumentException(result?.ErrorMessage ?? "Validation failed", nameof(NinaWebSocketOptions));
         }
     }
 }
@@ -238,7 +238,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
     private readonly ConcurrentDictionary<string, ClientWebSocket> _channelConnections = new();
     private readonly ConcurrentDictionary<string, Task> _channelReceiveTasks = new();
     private readonly ConcurrentDictionary<string, ConnectionMetrics> _connectionMetrics = new();
-    
+
     private bool _disposed;
     private int _reconnectAttempts;
 
@@ -266,7 +266,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
                 _options.CircuitBreakerFailureThreshold,
                 TimeSpan.FromSeconds(_options.CircuitBreakerTimeoutSeconds),
                 logger);
-                
+
             _logger.LogInformation("WebSocket circuit breaker enabled - FailureThreshold: {FailureThreshold}, Timeout: {Timeout}s",
                 _options.CircuitBreakerFailureThreshold, _options.CircuitBreakerTimeoutSeconds);
         }
@@ -303,9 +303,9 @@ public class NinaWebSocketClient : INinaWebSocketClient
             // Connect to all AsyncAPI channels as specified in NINA API documentation
             var channelsToConnect = new[] { "/socket", "/mount", "/tppa", "/filterwheel" };
             var connectionTasks = channelsToConnect.Select(channel => ConnectToChannelAsync(channel, cancellationToken)).ToArray();
-            
+
             var results = await Task.WhenAll(connectionTasks);
-            
+
             if (results.All(r => r.IsSuccessful))
             {
                 _logger.LogInformation("Successfully connected to all NINA WebSocket channels");
@@ -350,7 +350,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
 
             _channelConnections[channel] = webSocket;
             _connectionMetrics[channel] = new ConnectionMetrics();
-            
+
             // Start receiving messages for this channel with memory optimization
             _channelReceiveTasks[channel] = ReceiveChannelMessagesAsync(channel, _cancellationTokenSource.Token);
 
@@ -424,7 +424,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
                     await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client disconnect", cancellationToken);
                 }
                 webSocket.Dispose();
-                
+
                 _logger.LogDebug("Disconnected from WebSocket channel: {Channel}", channel);
             }
         }
@@ -460,12 +460,12 @@ public class NinaWebSocketClient : INinaWebSocketClient
                     {
                         var message = Encoding.UTF8.GetString(buffer.Buffer, 0, result.Count);
                         _logger.LogTrace("Received message on channel {Channel}: {Message}", channel, message);
-                        
+
                         // Update metrics
                         metrics.MessagesReceived++;
                         metrics.BytesReceived += result.Count;
                         metrics.LastMessageTime = DateTime.UtcNow;
-                        
+
                         // Process message asynchronously to avoid blocking the receive loop
                         _ = Task.Run(() => ProcessChannelMessageAsync(channel, message), CancellationToken.None);
                     }
@@ -653,19 +653,19 @@ public class NinaWebSocketClient : INinaWebSocketClient
     public async Task<Result<bool>> SendTestMessageAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Sending test message to NINA WebSocket");
-        
+
         try
         {
             var channels = new[] { "/socket", "/mount", "/tppa", "/filterwheel" };
             var testResults = new List<Result<bool>>();
-            
+
             foreach (var channel in channels)
             {
                 try
                 {
                     var result = await SendToChannelAsync(channel, "ping", cancellationToken);
                     testResults.Add(result);
-                    
+
                     if (result.IsSuccessful)
                     {
                         _logger.LogInformation("✅ Test message sent successfully to channel {Channel}", channel);
@@ -681,10 +681,10 @@ public class NinaWebSocketClient : INinaWebSocketClient
                     testResults.Add(Result<bool>.Failure(ex));
                 }
             }
-            
+
             var successfulTests = testResults.Count(r => r.IsSuccessful);
             _logger.LogInformation("🎯 WebSocket test complete: {Successful}/{Total} channels responded", successfulTests, testResults.Count);
-            
+
             return successfulTests > 0 ? Result<bool>.Success(true) : Result<bool>.Failure(new InvalidOperationException("No channels responded to test messages"));
         }
         catch (Exception ex)
@@ -698,31 +698,31 @@ public class NinaWebSocketClient : INinaWebSocketClient
     public async Task<Result<string>> DiscoverWebSocketEndpointAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("🔍 Discovering available NINA WebSocket endpoints...");
-        
+
         var baseUrl = _options.BaseUri.Replace("ws://", "").Replace("wss://", "");
         var parts = baseUrl.Split(':');
         var host = parts[0];
         var port = parts.Length > 1 ? parts[1].Split('/')[0] : "1888";
-        
+
         var channelsToTest = new[] { "/socket", "/mount", "/tppa", "/filterwheel" };
         var workingEndpoints = new List<string>();
-        
+
         foreach (var channel in channelsToTest)
         {
             var endpoint = $"ws://{host}:{port}/v2{channel}";
-            
+
             try
             {
                 using var testSocket = new ClientWebSocket();
                 var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 timeoutCts.CancelAfter(2000);
-                
+
                 _logger.LogDebug("Testing WebSocket endpoint: {Endpoint}", endpoint);
                 await testSocket.ConnectAsync(new Uri(endpoint), timeoutCts.Token);
-                
+
                 workingEndpoints.Add(endpoint);
                 _logger.LogInformation("✅ Working WebSocket endpoint found: {Endpoint}", endpoint);
-                
+
                 await testSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Discovery test", CancellationToken.None);
             }
             catch (Exception ex)
@@ -730,7 +730,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
                 _logger.LogDebug("❌ Endpoint {Endpoint} failed: {Error}", endpoint, ex.Message);
             }
         }
-        
+
         if (workingEndpoints.Count > 0)
         {
             var result = string.Join(", ", workingEndpoints);
@@ -753,7 +753,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
     {
         var bufferStats = _bufferManager.GetStatistics();
         var connectionStats = _connectionMetrics.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        
+
         return new NinaWebSocketDiagnostics
         {
             IsDisposed = _disposed,
@@ -810,14 +810,14 @@ public class NinaWebSocketClient : INinaWebSocketClient
             var buffer = new ArraySegment<byte>(bytes);
 
             await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
-            
+
             // Update metrics
             if (_connectionMetrics.TryGetValue(channel, out var metrics))
             {
                 metrics.MessagesSent++;
                 metrics.BytesSent += bytes.Length;
             }
-            
+
             _logger.LogTrace("Message sent to NINA WebSocket channel {Channel}: {Message}", channel, message);
             return Result<bool>.Success(true);
         }
@@ -841,7 +841,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
         }
 
         _reconnectAttempts++;
-        _logger.LogInformation("Attempting to reconnect channel {Channel} (attempt {Attempt}/{MaxAttempts})", 
+        _logger.LogInformation("Attempting to reconnect channel {Channel} (attempt {Attempt}/{MaxAttempts})",
             channel, _reconnectAttempts, _options.MaxReconnectAttempts);
 
         await Task.Delay(_options.ReconnectDelayMs, _cancellationTokenSource.Token);
@@ -849,7 +849,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
         var result = await ConnectToChannelAsync(channel, _cancellationTokenSource.Token);
         if (!result.IsSuccessful)
         {
-            _logger.LogWarning("Reconnection attempt {Attempt} failed for channel {Channel}: {Error}", 
+            _logger.LogWarning("Reconnection attempt {Attempt} failed for channel {Channel}: {Error}",
                 _reconnectAttempts, channel, result.Error?.Message);
         }
         else
@@ -1017,7 +1017,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
         try
         {
             _cancellationTokenSource.Cancel();
-            
+
             // Dispose all channel connections
             foreach (var webSocket in _channelConnections.Values)
             {
@@ -1026,7 +1026,7 @@ public class NinaWebSocketClient : INinaWebSocketClient
             _channelConnections.Clear();
             _channelReceiveTasks.Clear();
             _connectionMetrics.Clear();
-            
+
             _connectionSemaphore.Dispose();
             _cancellationTokenSource.Dispose();
             _bufferManager?.Dispose();
