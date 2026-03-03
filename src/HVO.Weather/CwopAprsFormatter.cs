@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace HVO.Weather
 {
@@ -106,7 +107,7 @@ namespace HVO.Weather
         public static string FormatLatitude(int degrees, int minutes, double seconds, string hemisphere)
         {
             double totalMinutes = minutes + seconds / 60.0;
-            return string.Format("{0:00}{1:00.00}{2}", degrees, totalMinutes, hemisphere ?? "N");
+            return string.Format(CultureInfo.InvariantCulture, "{0:00}{1:00.00}{2}", degrees, totalMinutes, hemisphere ?? "N");
         }
 
         /// <summary>
@@ -120,7 +121,7 @@ namespace HVO.Weather
         public static string FormatLongitude(int degrees, int minutes, double seconds, string hemisphere)
         {
             double totalMinutes = minutes + seconds / 60.0;
-            return string.Format("{0:000}{1:00.00}{2}", degrees, totalMinutes, hemisphere ?? "W");
+            return string.Format(CultureInfo.InvariantCulture, "{0:000}{1:00.00}{2}", degrees, totalMinutes, hemisphere ?? "W");
         }
 
         /// <summary>

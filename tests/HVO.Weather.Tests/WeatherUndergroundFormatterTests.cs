@@ -192,8 +192,8 @@ public class WeatherUndergroundFormatterTests
 
         var qs = WeatherUndergroundFormatter.FormatQueryString(observation);
 
-        Assert.IsTrue(qs.Contains("dateutc=2025-06-15 14:30:45"),
-            $"Date should be formatted as 'yyyy-MM-dd HH:mm:ss', got: {qs}");
+        Assert.IsTrue(qs.Contains("dateutc=2025-06-15%2014%3A30%3A45"),
+            $"Date should be URL-encoded, got: {qs}");
     }
 
     [TestMethod]

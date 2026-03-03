@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text;
 
 namespace HVO.Weather
@@ -51,7 +52,7 @@ namespace HVO.Weather
             Append(sb, "ID", observation.StationId);
             Append(sb, "PASSWORD", observation.Password);
             Append(sb, "action", "updateraw");
-            Append(sb, "dateutc", observation.ObservationTimeUtc.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss"));
+            Append(sb, "dateutc", Uri.EscapeDataString(observation.ObservationTimeUtc.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)));
             Append(sb, "softwaretype", observation.SoftwareType ?? "Custom");
 
             // Indoor values
@@ -104,13 +105,13 @@ namespace HVO.Weather
         private static void AppendOptional(StringBuilder sb, string key, double? value)
         {
             if (!value.HasValue) return;
-            Append(sb, key, value.Value.ToString());
+            Append(sb, key, value.Value.ToString(CultureInfo.InvariantCulture));
         }
 
         private static void AppendOptional(StringBuilder sb, string key, string? value)
         {
             if (string.IsNullOrEmpty(value)) return;
-            Append(sb, key, value!);
+            Append(sb, key, Uri.EscapeDataString(value!));
         }
     }
 
