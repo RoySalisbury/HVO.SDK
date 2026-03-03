@@ -1,6 +1,6 @@
 # HVO Workspace Repository Map
 
-> Last updated: 2026-07-16
+> Last updated: 2026-03-02
 
 This document catalogs all repositories in the HVO multi-repo workspace, their purpose, projects, and how domain logic maps across them. It serves as the single reference for understanding where code lives and where it should go.
 
@@ -12,6 +12,8 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 - [Domain Logic Map](#domain-logic-map)
 - [Duplication Tracker](#duplication-tracker)
 - [Migration Status](#migration-status)
+- [Repos to Archive](#repos-to-archive)
+- [Forked Repos to Delete](#forked-repos-to-delete)
 
 ---
 
@@ -21,7 +23,7 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 |------|--------|---------|---------|
 | **HVO.SDK** | Active | .NET 10 / ns2.0 / net8.0 | Foundation NuGet packages — shared across all HVO projects |
 | **HVO.SkyMonitor** | Active | .NET 10 | Next-gen distributed all-sky camera system (microservices) |
-| **HVOv9** | Active | .NET 10 | Monorepo — SkyMonitorV4/V5 (production), Playground, NinaClient |
+| **HVOv9** | Active | .NET 10 | Monorepo — SkyMonitorV4/V5 (production), Playground |
 | **HVO.WebSite** | Active | .NET 9 | Observatory website — weather/power dashboards, all-sky viewer |
 | **HVO.RoofController** | Active | .NET 9 | Roof automation — RPi server + iPad MAUI client |
 | **HVO.AiCodeReview** | Active | .NET 10 | AI-powered Azure DevOps PR code review service |
@@ -49,6 +51,7 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 | `HVO.Astronomy.CFITSIO` | net10.0 | 1.0.4 | FITS file I/O via cfitsio native library |
 | `HVO.Astronomy.CFITSIO.NativeAssets` | net10.0 | 1.0.4 | Native cfitsio binaries (linux-arm64) |
 | `HVO.Astronomy.TheSkyX` | ns2.0 | 1.0.0 | TheSkyX telescope control TCP/socket client — mount, camera, focuser, filter wheel, rotator, plate solving |
+| `HVO.NinaClient` | net8.0 | 1.0.0 | NINA astronomy software REST + WebSocket client — full equipment control, sequencer, imaging, guiding, circuit breaker, DI extensions |
 
 **IoT Devices included:**
 - `GpioLimitSwitch` — limit switch with debounce and event-driven state changes
@@ -59,8 +62,10 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 - `GpioControllerClient` / `MemoryGpioControllerClient` — GPIO abstractions for testing
 - `Mlx90614` — MLX90614 non-contact IR temperature sensor (ambient + object temps)
 - `Si1145` — SI1145 UV/visible/IR/proximity sensor with auto-measurement
-- `Tsl2591` — TSL2591 high-dynamic-range light sensor with auto-gain-ranging
-
+- `Tsl2591` — TSL2591 high-dynamic-range light sensor with auto-gain-ranging- `Htu21df` — HTU21DF humidity and temperature sensor
+- `Ds3231m` — DS3231M real-time clock with temperature compensation
+- `Mcp23008` — MCP23008 8-bit I/O expander
+- `Mcp23017` — MCP23017 16-bit I/O expander
 ### HVO.SkyMonitor
 
 > Next-gen distributed SkyMonitor. Microservices architecture with camera agents, logic host, and shared contracts.
@@ -87,7 +92,7 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 | `HVO.SkyMonitorV5.RPi.Stress` | Stress testing harness |
 | `HVO.SkyMonitorV4.RPi` | Legacy SkyMonitorV4 (ASP.NET Core + ZWO) |
 | `HVO.SkyMonitorV4.CLI` | CLI tool for SkyMonitorV4 |
-| `HVO.NinaClient` | NINA astronomy software REST/WebSocket client |
+| ~~`HVO.NinaClient`~~ | *Migrated to HVO.SDK — use NuGet package* |
 | `HVO.GpioTestApp` | GPIO testing utility |
 | `HVO.Playground.CLI` | General playground CLI |
 
@@ -160,24 +165,60 @@ Target: `netstandard2.0`
 
 EF Core DbContext for Azure SQL Server with 16+ entity tables: weather records, power system records (3 subsystems), camera records, sky monitor sensors, web power switch configs, plus one-minute archive tables.
 
-#### Azure Functions V2 (6 functions)
+#### Azure Functions (3 generations, all archived)
 
-| Function | Trigger | Purpose | Status |
-|----------|---------|---------|--------|
-| `DavisVantagePro` | ServiceBus `weatherrecords` | Parse binary weather → SQL | May be active |
-| `OutbackPower` | ServiceBus `powerrecords` | Parse serial power data → SQL | May be active |
-| `CitizensWeather` | Timer (5 min) | Forward weather to CWOP/APRS | May be active |
-| `WeatherUnderground` | Timer (30 sec) | Forward weather to WU API | May be active |
-| `BlueIris` | ServiceBus (3 queues) | Camera image/video records → SQL | Unknown |
-| `SkyMonitor` | ServiceBus `skymonitor` | Luminosity/temp sensor data → SQL | Unknown |
+**Generation 1** (`HVO.Azure.FunctionsV1/`):
 
-#### Edge Agents (2 generations)
+| Function | Trigger | Purpose |
+|----------|---------|---------|
+| `ProcessDavisVantageProConsoleRecord` | ServiceBus `weatherrecords` | Parse binary Davis VP LOOP packet → SQL |
+| `ProcessOutbackPowerRecord` | ServiceBus `powerrecords` | Parse Outback Mate 2 serial data → SQL |
+| `ProcessCitizensWeather` | Timer `15 */5 * * * *` (every 5 min) | Format APRS packet → TCP to `cwop.aprs.net:14580` (station `DW4515`) |
+| `ProcessWeatherUnderground` | Timer `*/30 * * * * *` (every 30 sec) | Format 25+ weather params → HTTP GET to WU API (station `KAZKINGM12`) |
 
-V1 (`HVO.ObservatoryControl.*`) and V2 (`HVO.ObservatoryMonitor.*`):
-- **WeatherMonitor** — Davis VP TCP → RabbitMQ
-- **PowerMonitor** — Outback Mate UDP → RabbitMQ
-- **CameraUpload** — Filesystem watch → Azure Blob Storage → Service Bus
-- **QueueTransferAgent** — RabbitMQ → Azure Service Bus bridge
+**Generation 2** (`HVO.Azure.FunctionsV2.*/`, separate project per function — latest active version):
+
+| Function | Project | Trigger | Purpose |
+|----------|---------|---------|---------|
+| `ProcessDavisVantageProConsoleRecord` | `FunctionsV2.DavisVantagePro` | ServiceBus `weatherrecords` | Parse binary Davis VP LOOP packet → SQL |
+| `ProcessOutbackPowerRecord` | `FunctionsV2.OutbackPower` | ServiceBus `powerrecords` | Parse Outback Mate 2 serial data → SQL |
+| `ProcessCitizensWeather` | `FunctionsV2.CitizensWeather` | Timer (every 5 min) | APRS packet → CWOP server |
+| `ProcessWeatherUnderground` | `FunctionsV2.WeatherUnderground` | Timer (every 30 sec) | Weather data → WU API |
+| `ProcessSecurityCameraImage` | `FunctionsV2.BlueIris` | ServiceBus `securitycamera/images` | Security camera image records → SQL |
+| `ProcessSecurityCameraVideo` | `FunctionsV2.BlueIris` | ServiceBus `securitycamera/video` | Security camera video records → SQL |
+| `ProcessWeatherCameraImage` | `FunctionsV2.BlueIris` | ServiceBus `weathercamera/images` | Weather camera image records → SQL |
+| `ProcessWeatherCameraVideo` | `FunctionsV2.BlueIris` | ServiceBus `weathercamera/video` | Weather camera video records → SQL |
+| `ProcessAllSkyCameraImage` | `FunctionsV2.BlueIris` | ServiceBus `allskycamera/images` | All-sky camera image records → SQL |
+| `ProcessAllSkyCameraVideo` | `FunctionsV2.BlueIris` | ServiceBus `allskycamera/video` | All-sky camera video records → SQL |
+| `ProcessSkyMonitor` | `FunctionsV2.SkyMonitor` | ServiceBus `skymonitor` | Sky sensor (luminosity/temp) data → SQL |
+
+**Other**: `HualapaiValleyObservatory.Alexa.SmartHomeSkill` — AWS Lambda (Alexa Smart Home discovery, partially implemented)
+
+#### Edge Agents (2 generations, deployed as Linux systemd services — no Docker)
+
+**V1** (`HVO.ObservatoryControl.*`):
+
+| Agent | Communication | Purpose |
+|-------|---------------|---------|
+| `WeatherMonitor` | Davis VP TCP (WeatherLink IP) → RabbitMQ, batch → Azure Service Bus | Reads 99-byte LOOP packets from Davis VP console |
+| `PowerMonitor` | UDP listener → RabbitMQ, batch → Azure Service Bus | Receives Outback Mate 2 serial data broadcasts |
+| `CameraUpload` | Filesystem watch → Azure Blob Storage + Service Bus | Watches Blue Iris directories for new image/video files |
+| `QueueTransferAgent` | RabbitMQ → Azure Service Bus | Generic message bridge, configurable per queue |
+
+**V2** (`HVO.ObservatoryMonitor.*`, netcoreapp2.2, HostedService pattern):
+
+| Agent | Communication | Purpose |
+|-------|---------------|---------|
+| `WeatherStationAgent` | Same as V1 WeatherMonitor | HostedService refactor of V1 |
+| `OutbackPowerAgent` | Same as V1 PowerMonitor | HostedService refactor of V1 |
+| `ImageUploadAgent` | Same as V1 CameraUpload | HostedService refactor of V1 |
+| `QueueTransferAgent` | Same as V1 QueueTransferAgent | HostedService refactor of V1 |
+
+#### External Services (not in GitHub)
+
+| Service | Location | Communication | Purpose |
+|---------|----------|---------------|---------|
+| JK BMS monitor | Linux box (systemd service) | Bluetooth to JK BMS | Reads battery management system data (voltage, current, SOC) — **not tracked in any GitHub repo** |
 
 #### IoT Devices (`HualapaiValleyObservatory.IoT/`)
 Target: UWP 10.0.15063.0
@@ -242,8 +283,8 @@ Where observatory domain knowledge currently lives and where it should go:
 | Barometric pressure conversions | HVOv6 `HVO/Weather/BarometricPressure.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
 | Meteorological algorithms (8+) | HVOv6 `HVO/Weather/WxUtils.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
 | CRC-16 CCITT | HVOv6 `HVO/Security/Cryptography/Crc16.cs` | **HVO.SDK** `HVO.Weather` 1.0.0 | ✅ Done |
-| CWOP/APRS formatting | HVOv6 Azure Function `CitizensWeather` | — | Stays in function / agent |
-| Weather Underground posting | HVOv6 Azure Function `WeatherUnderground` | — | Stays in function / agent |
+| CWOP/APRS packet formatting | HVOv6 `FunctionsV2.CitizensWeather/ProcessCitizensWeather.cs` *(archived)* | — | 🚧 Migrating to `HVO.Weather` |
+| Weather Underground URL builder | HVOv6 `FunctionsV2.WeatherUnderground/ProcessWeatherUnderground.cs` *(archived)* | — | 🚧 Migrating to `HVO.Weather` |
 
 ### Power Systems
 
@@ -254,6 +295,7 @@ Where observatory domain knowledge currently lives and where it should go:
 | FlexNet DC records | HVOv6 `HVO/Power/OutbackPowerSystems/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
 | Inverter/charger records | HVOv6 `HVO/Power/OutbackPowerSystems/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
 | Web Power Switch HTTP control | HVOv6 `HVO/Power/DigitalLoggers/` | **HVO.SDK** `HVO.Power` 1.0.0 | ✅ Done |
+| JK BMS battery monitor | External (Linux systemd service, Bluetooth) | — | ⬜ Not tracked in GitHub — custom service reading JK BMS via Bluetooth |
 
 ### IoT / Hardware
 
@@ -265,9 +307,9 @@ Where observatory domain knowledge currently lives and where it should go:
 | MLX90614 (IR sky temp) | HVOv6 `HualapaiValleyObservatory.IoT/` + nF.Devices | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
 | TSL2591 (luminosity) | HVOv6 `HualapaiValleyObservatory.IoT/` + nF.Devices | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
 | SI1145 (UV/visible/IR) | HVOv6 `HualapaiValleyObservatory.IoT/` + nF.Devices | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
-| HTU21DF (humidity/temp) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
-| DS3231M (RTC) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
-| MCP23008/23017 (GPIO expander) | HVOv6 `HualapaiValleyObservatory.IoT/` | — | **HVO.SDK** `HVO.Iot.Devices` |
+| HTU21DF (humidity/temp) | HVOv6 `HualapaiValleyObservatory.IoT/` | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
+| DS3231M (RTC) | HVOv6 `HualapaiValleyObservatory.IoT/` | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
+| MCP23008/23017 (GPIO expander) | HVOv6 `HualapaiValleyObservatory.IoT/` | **HVO.SDK** `HVO.Iot.Devices` 1.2.0 | ✅ Done |
 | ZWO ASI camera SDK | — | **HVO.SDK** `HVO.ZWOOptical.ASISDK` 0.0.4 | ✅ Done |
 
 ### Camera / Imaging
@@ -306,10 +348,49 @@ Track what has been migrated from legacy repos to SDK/active repos.
 | Astronomy calculations | HVOv6 `HVO/Astronomy/` + HVOv9-SkyMonitorv6 `Imaging/Planets/` | HVO.SDK `HVO.Astronomy` | ✅ Done | Sun, Moon, planets, twilight, Lat/Lon, J2000. 3 bugs fixed: Crescent spelling, Longitude always-West, DivideByZero. 93 unit tests. |
 | Weather protocols | HVOv6 `HVO/Weather/` | HVO.SDK `HVO.Weather` | ✅ Done | Davis VP binary parser, WeatherLink TCP, 8+ met algorithms, CRC-16, unit conversions. PR #27. |
 | Power systems | HVOv6 `HVO/Power/` | HVO.SDK `HVO.Power` | ✅ Done | Outback Mate 2 serial parser, Web Power Switch HTTP control, 7 enum types. PR #28. |
-| I2C sensor drivers | HVOv6 IoT + nF.Devices | HVO.SDK `HVO.Iot.Devices` | 🚧 In progress | MLX90614, SI1145, TSL2591 done. HTU21DF, DS3231M, MCP23008/23017 remaining. |
+| I2C sensor drivers | HVOv6 IoT + nF.Devices | HVO.SDK `HVO.Iot.Devices` | ✅ Done | MLX90614, SI1145, TSL2591 (PR #29). HTU21DF, DS3231M, MCP23008, MCP23017 (PR #32). |
 | Star catalogs | HVOv9-SkyMonitorv6 `Imaging/Catalogs/` | HVO.SDK `HVO.Astronomy` | ⬜ Not started | HYG, deep-sky, constellations |
 | Star field rendering | HVOv9-SkyMonitorv6 `Imaging/Rendering/` | HVO.SkyMonitor | ⬜ Not started | Projectors, star color map (imaging, not astronomy) |
 | FITS file I/O | — | HVO.SDK `HVO.Astronomy.CFITSIO` | ✅ Done | v1.0.4 published |
 | GPIO / relay / switch | — | HVO.SDK `HVO.Iot.Devices` | ✅ Done | v1.1.0 published |
 | ZWO ASI SDK | — | HVO.SDK `HVO.ZWOOptical.ASISDK` | ✅ Done | v0.0.4 published |
-| TheSkyX telescope control | `RoySalisbury/TheSkyX` | HVO.SDK `HVO.Astronomy.TheSkyX` | ✅ Done | TCP/socket client, mount/camera/focuser/filter/rotator/plate solving. PR #30. |
+| TheSkyX telescope control | `RoySalisbury/TheSkyX` | HVO.SDK `HVO.Astronomy.TheSkyX` | ✅ Done | TCP/socket client, mount/camera/focuser/filter/rotator/plate solving. PR #31. |
+| NINA client | HVOv9 `HVO.NinaClient` | HVO.SDK `HVO.NinaClient` | ✅ Done | REST + WebSocket client, 120+ source files, circuit breaker, buffer management, DI extensions. PR #34. |
+
+---
+
+## Repos to Archive
+
+These repos are legacy, superseded, or no longer actively developed. They should be archived on GitHub to signal read-only status and reduce account clutter.
+
+| Repo | Reason | Action |
+|------|--------|--------|
+| `HVOv1` | Ancient legacy (v1) | ✅ Archived |
+| `HVOv2` | Ancient legacy (v2) | ✅ Archived |
+| `HVOv3` | Ancient legacy (v3) | ✅ Archived |
+| `HVOv4` | Ancient legacy (v4) | ✅ Archived |
+| `HVOv5` | Ancient legacy (v5) | ✅ Archived |
+| `HVOv6` | Legacy monorepo — all domain logic migrated to HVO.SDK | ✅ Archived |
+| `HVOv7` | Ancient legacy (v7) | ✅ Archived |
+| `HVOv8` | Legacy (v8), public | ✅ Archived |
+| `HVOv9-SkyMonitorv6` | Legacy reference — phase-3 branch merged for preservation (PR #2) | ✅ Archived |
+| `TheSkyX` | Migrated to HVO.SDK `HVO.Astronomy.TheSkyX` (PR #31) | ✅ Archived |
+| `NinaWebUIPlugIn` | NINA plugin experiment, no longer maintained | ✅ Archived |
+| `nF.CoreLibrary` | nanoFramework experiment, no longer maintained | ✅ Archived |
+| `nF.Devices` | nanoFramework drivers — I2C sensors migrated to HVO.SDK `HVO.Iot.Devices` | ✅ Archived |
+| `DevOpsMcp` | DevOps MCP server experiment, last updated Aug 2025 | ✅ Archived |
+
+---
+
+## Forked Repos ~~to Delete~~ — Deleted
+
+All forks deleted on 2026-03-02.
+
+| Repo | Forked From | Status |
+|------|-------------|--------|
+| ~~`nina`~~ | christian-photo/nina | ✅ Deleted |
+| ~~`lib-CoreLibrary`~~ | nanoframework/lib-CoreLibrary | ✅ Deleted |
+| ~~`lib-nanoFramework.Hardware.Esp32`~~ | nanoframework/lib-nanoFramework.Hardware.Esp32 | ✅ Deleted |
+| ~~`nf-Community-Contributions`~~ | nanoframework/nf-Community-Contributions | ✅ Deleted |
+| ~~`nf-interpreter`~~ | nanoframework/nf-interpreter | ✅ Deleted |
+| ~~`lib-Windows.Devices.Gpio`~~ | nanoframework/lib-Windows.Devices.Gpio | ✅ Deleted |
