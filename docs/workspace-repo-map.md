@@ -48,6 +48,7 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 | `HVO.Power` | ns2.0 | 1.0.0 | Outback Mate 2 serial parser, charge controller/FlexNet/inverter records, Digital Loggers Web Power Switch |
 | `HVO.Astronomy.CFITSIO` | net10.0 | 1.0.4 | FITS file I/O via cfitsio native library |
 | `HVO.Astronomy.CFITSIO.NativeAssets` | net10.0 | 1.0.4 | Native cfitsio binaries (linux-arm64) |
+| `HVO.Astronomy.TheSkyX` | ns2.0 | 1.0.0 | TheSkyX telescope control TCP/socket client — mount, camera, focuser, filter wheel, rotator, plate solving |
 
 **IoT Devices included:**
 - `GpioLimitSwitch` — limit switch with debounce and event-driven state changes
@@ -311,3 +312,4 @@ Track what has been migrated from legacy repos to SDK/active repos.
 | FITS file I/O | — | HVO.SDK `HVO.Astronomy.CFITSIO` | ✅ Done | v1.0.4 published |
 | GPIO / relay / switch | — | HVO.SDK `HVO.Iot.Devices` | ✅ Done | v1.1.0 published |
 | ZWO ASI SDK | — | HVO.SDK `HVO.ZWOOptical.ASISDK` | ✅ Done | v0.0.4 published |
+| TheSkyX telescope control | `RoySalisbury/TheSkyX` | HVO.SDK `HVO.Astronomy.TheSkyX` | ✅ Done | TCP/socket client, mount/camera/focuser/filter/rotator/plate solving. PR #30. |
