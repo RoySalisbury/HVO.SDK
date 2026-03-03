@@ -9,6 +9,19 @@ updates:
     labels:
       - "dependencies"
       - "nuget"
+    groups:
+      skiasharp:
+        patterns:
+          - "SkiaSharp*"
+      microsoft-extensions:
+        patterns:
+          - "Microsoft.Extensions.*"
+      testing:
+        patterns:
+          - "Microsoft.NET.Test.Sdk"
+          - "MSTest*"
+          - "FluentAssertions"
+          - "coverlet.*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
