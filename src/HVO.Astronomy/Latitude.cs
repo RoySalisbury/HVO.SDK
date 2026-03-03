@@ -6,7 +6,7 @@ namespace HVO.Astronomy
     /// Represents a geographic latitude in degrees-minutes-seconds with hemisphere.
     /// Provides implicit conversions to and from <see cref="double"/>.
     /// </summary>
-    public sealed class Latitude
+    public readonly struct Latitude : IEquatable<Latitude>
     {
         /// <summary>
         /// Initializes a new <see cref="Latitude"/> from DMS components.
@@ -73,5 +73,29 @@ namespace HVO.Astronomy
             string dir = Hemisphere == LatitudeHemisphere.North ? "N" : "S";
             return string.Format("{0} {1}\u00B0 {2}' {3:F1}\"", dir, Degrees, Minutes, Seconds);
         }
+
+        /// <inheritdoc />
+        public bool Equals(Latitude other)
+            => Degrees == other.Degrees && Minutes == other.Minutes
+               && Seconds.Equals(other.Seconds) && Hemisphere == other.Hemisphere;
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is Latitude other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            int h = Degrees;
+            h = h * 397 ^ Minutes;
+            h = h * 397 ^ Seconds.GetHashCode();
+            h = h * 397 ^ (int)Hemisphere;
+            return h;
+        }
+
+        /// <summary>Equality operator</summary>
+        public static bool operator ==(Latitude left, Latitude right) => left.Equals(right);
+
+        /// <summary>Inequality operator</summary>
+        public static bool operator !=(Latitude left, Latitude right) => !left.Equals(right);
     }
 }

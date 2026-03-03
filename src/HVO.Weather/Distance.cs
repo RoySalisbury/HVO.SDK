@@ -1,3 +1,5 @@
+using System;
+
 namespace HVO.Weather
 {
     /// <summary>
@@ -7,15 +9,17 @@ namespace HVO.Weather
     /// <remarks>
     /// <para>
     /// Internal storage uses meters as the canonical unit. All other units are computed on access.
-    /// Instances are immutable — use the static factory methods to create values.
+    /// This is an immutable value type — use the static factory methods to create values.
     /// </para>
     /// </remarks>
-    public sealed class Distance
+    public readonly struct Distance : IEquatable<Distance>, IComparable<Distance>
     {
         /// <summary>Conversion factor: 1 meter = 3.28084 feet.</summary>
         private const double MetersToFeet = 3.28084;
 
-        private Distance() { }
+        private readonly double _meters;
+
+        private Distance(double meters) => _meters = meters;
 
         /// <summary>
         /// Creates a <see cref="Distance"/> from a value in meters.
@@ -23,9 +27,7 @@ namespace HVO.Weather
         /// <param name="value">The distance in meters.</param>
         /// <returns>A new <see cref="Distance"/> instance.</returns>
         public static Distance FromMeters(double value)
-        {
-            return new Distance() { Meters = value };
-        }
+            => new Distance(value);
 
         /// <summary>
         /// Creates a <see cref="Distance"/> from a value in feet.
@@ -33,9 +35,7 @@ namespace HVO.Weather
         /// <param name="value">The distance in feet.</param>
         /// <returns>A new <see cref="Distance"/> instance.</returns>
         public static Distance FromFeet(double value)
-        {
-            return new Distance() { Feet = value };
-        }
+            => new Distance(value / MetersToFeet);
 
         /// <summary>
         /// Creates a <see cref="Distance"/> from a value in kilometers.
@@ -43,9 +43,7 @@ namespace HVO.Weather
         /// <param name="value">The distance in kilometers.</param>
         /// <returns>A new <see cref="Distance"/> instance.</returns>
         public static Distance FromKilometers(double value)
-        {
-            return new Distance() { Kilometers = value };
-        }
+            => new Distance(value * 1000);
 
         /// <summary>
         /// Creates a <see cref="Distance"/> from a value in miles.
@@ -53,9 +51,7 @@ namespace HVO.Weather
         /// <param name="value">The distance in miles.</param>
         /// <returns>A new <see cref="Distance"/> instance.</returns>
         public static Distance FromMiles(double value)
-        {
-            return new Distance() { Miles = value };
-        }
+            => new Distance(value * 5280 / MetersToFeet);
 
         /// <summary>
         /// Creates a <see cref="Distance"/> from a value in centimeters.
@@ -63,62 +59,69 @@ namespace HVO.Weather
         /// <param name="value">The distance in centimeters.</param>
         /// <returns>A new <see cref="Distance"/> instance.</returns>
         public static Distance FromCentimeters(double value)
-        {
-            return new Distance() { Centimeters = value };
-        }
+            => new Distance(value / 100);
 
         /// <summary>
         /// Gets the distance in kilometers.
         /// </summary>
-        public double Kilometers
-        {
-            get { return Meters / 1000; }
-            private set { Meters = value * 1000; }
-        }
+        public double Kilometers => _meters / 1000;
 
         /// <summary>
         /// Gets the distance in centimeters.
         /// </summary>
-        /// <remarks>
-        /// BUG FIX: The legacy HVOv6 implementation used <c>value / 10</c> in the setter,
-        /// which caused 100 cm to produce 10 m instead of 1 m. This has been corrected to <c>value / 100</c>.
-        /// </remarks>
-        public double Centimeters
-        {
-            get { return Meters * 100; }
-            private set { Meters = value / 100; }
-        }
+        public double Centimeters => _meters * 100;
 
         /// <summary>
         /// Gets the distance in meters (canonical internal unit).
         /// </summary>
-        public double Meters { get; private set; }
+        public double Meters => _meters;
 
         /// <summary>
         /// Gets the distance in inches.
         /// </summary>
-        public double Inches
-        {
-            get { return Feet * 12; }
-            private set { Feet = value / 12; }
-        }
+        public double Inches => Feet * 12;
 
         /// <summary>
         /// Gets the distance in feet.
         /// </summary>
-        public double Feet
-        {
-            get { return Meters * MetersToFeet; }
-            private set { Meters = value / MetersToFeet; }
-        }
+        public double Feet => _meters * MetersToFeet;
 
         /// <summary>
         /// Gets the distance in miles.
         /// </summary>
-        public double Miles
-        {
-            get { return Feet / 5280; }
-            private set { Feet = value * 5280; }
-        }
+        public double Miles => Feet / 5280;
+
+        /// <inheritdoc />
+        public bool Equals(Distance other) => _meters.Equals(other._meters);
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is Distance other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => _meters.GetHashCode();
+
+        /// <inheritdoc />
+        public int CompareTo(Distance other) => _meters.CompareTo(other._meters);
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Meters:F2} m";
+
+        /// <summary>Equality operator</summary>
+        public static bool operator ==(Distance left, Distance right) => left.Equals(right);
+
+        /// <summary>Inequality operator</summary>
+        public static bool operator !=(Distance left, Distance right) => !left.Equals(right);
+
+        /// <summary>Less-than operator</summary>
+        public static bool operator <(Distance left, Distance right) => left._meters < right._meters;
+
+        /// <summary>Greater-than operator</summary>
+        public static bool operator >(Distance left, Distance right) => left._meters > right._meters;
+
+        /// <summary>Less-than-or-equal operator</summary>
+        public static bool operator <=(Distance left, Distance right) => left._meters <= right._meters;
+
+        /// <summary>Greater-than-or-equal operator</summary>
+        public static bool operator >=(Distance left, Distance right) => left._meters >= right._meters;
     }
 }

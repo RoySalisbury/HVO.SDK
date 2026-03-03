@@ -70,10 +70,10 @@ public class OutbackMateRecordParserAutoDetectTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void Parse_NullInput_ThrowsArgumentNullException()
     {
-        OutbackMateRecordParser.Parse(DateTimeOffset.UtcNow, null!);
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            OutbackMateRecordParser.Parse(DateTimeOffset.UtcNow, null!));
     }
 
     [TestMethod]

@@ -608,6 +608,15 @@ public sealed partial class FitsFile : IDisposable
   }
 
   /// <summary>
+  /// Finalizer to release unmanaged memory (control blocks and external buffers)
+  /// if the caller neglects to call <see cref="Dispose"/>.
+  /// </summary>
+  ~FitsFile()
+  {
+    DisposeMemoryResources();
+  }
+
+  /// <summary>
   /// Dispose the file and close the underlying native handle. Safe to call multiple times.
   /// </summary>
   public void Dispose()
@@ -620,6 +629,7 @@ public sealed partial class FitsFile : IDisposable
     {
       // Clean up memory resources (control blocks and external buffers)
       DisposeMemoryResources();
+      GC.SuppressFinalize(this);
     }
   }
 

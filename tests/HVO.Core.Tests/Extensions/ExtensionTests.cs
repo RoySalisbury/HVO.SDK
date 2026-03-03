@@ -82,10 +82,10 @@ public class StringExtensionsTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void ToEnum_ThrowsWhenInvalid()
     {
-        _ = "Invalid".ToEnum<TestParseEnum>();
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            "Invalid".ToEnum<TestParseEnum>());
     }
 
     [TestMethod]
@@ -197,10 +197,10 @@ public class CollectionExtensionsTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
     public void Chunk_WithInvalidSize_ThrowsException()
     {
-        HvoCollectionExtensions.Chunk(new[] { 1, 2, 3 }, 0).ToList();
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+            HvoCollectionExtensions.Chunk(new[] { 1, 2, 3 }, 0).ToList());
     }
 
     [TestMethod]

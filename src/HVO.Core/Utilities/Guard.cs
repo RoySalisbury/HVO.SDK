@@ -105,15 +105,15 @@ public static class Guard
     }
 
     /// <summary>
-    /// Ensures that a value is greater than a specified minimum
+    /// Ensures that a value is greater than a specified minimum (exclusive lower bound).
     /// </summary>
     /// <typeparam name="T">The type of the value</typeparam>
     /// <param name="value">The value to check</param>
-    /// <param name="min">The minimum value (exclusive)</param>
+    /// <param name="min">The exclusive minimum value — the value must be strictly greater than this</param>
     /// <param name="parameterName">The name of the parameter</param>
     /// <returns>The value if greater than minimum</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is not greater than minimum</exception>
-    public static T AgainstNegativeOrZero<T>(T value, T min, string? parameterName = null)
+    public static T AgainstLessThanOrEqual<T>(T value, T min, string? parameterName = null)
         where T : IComparable<T>
     {
         if (value.CompareTo(min) <= 0)
@@ -121,6 +121,15 @@ public static class Guard
 
         return value;
     }
+
+    /// <summary>
+    /// Ensures that a value is greater than a specified minimum.
+    /// </summary>
+    /// <remarks>Obsolete: use <see cref="AgainstLessThanOrEqual{T}"/> instead.</remarks>
+    [System.Obsolete("Use AgainstLessThanOrEqual instead. This method will be removed in a future release.")]
+    public static T AgainstNegativeOrZero<T>(T value, T min, string? parameterName = null)
+        where T : IComparable<T>
+        => AgainstLessThanOrEqual(value, min, parameterName);
 
     /// <summary>
     /// Ensures that a condition is true

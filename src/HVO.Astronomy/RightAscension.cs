@@ -7,7 +7,7 @@ namespace HVO.Astronomy
     /// Represents a right ascension value in the equatorial coordinate system.
     /// Right ascension is measured in hours (0h to 24h), analogous to longitude on Earth.
     /// </summary>
-    public sealed class RightAscension
+    public readonly struct RightAscension : IEquatable<RightAscension>
     {
         private readonly TimeSpan _rightAscension;
 
@@ -17,7 +17,7 @@ namespace HVO.Astronomy
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RightAscension"/> class from hours, minutes, and seconds.
+        /// Initializes a new instance of the <see cref="RightAscension"/> struct from hours, minutes, and seconds.
         /// </summary>
         /// <param name="hours">Hours component (0–23).</param>
         /// <param name="minutes">Minutes component (0–59).</param>
@@ -125,5 +125,20 @@ namespace HVO.Astronomy
         /// </summary>
         /// <returns>A <see cref="TimeSpan"/> representing the right ascension.</returns>
         public TimeSpan ToTimeSpan() => _rightAscension;
+
+        /// <inheritdoc />
+        public bool Equals(RightAscension other) => _rightAscension.Equals(other._rightAscension);
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is RightAscension other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => _rightAscension.GetHashCode();
+
+        /// <summary>Equality operator</summary>
+        public static bool operator ==(RightAscension left, RightAscension right) => left.Equals(right);
+
+        /// <summary>Inequality operator</summary>
+        public static bool operator !=(RightAscension left, RightAscension right) => !left.Equals(right);
     }
 }

@@ -43,45 +43,45 @@ namespace HVO.Astronomy.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor_NegativeHours_ThrowsArgumentOutOfRange()
         {
-            _ = new RightAscension(-1, 0, 0.0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                new RightAscension(-1, 0, 0.0));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor_Hours24_ThrowsArgumentOutOfRange()
         {
-            _ = new RightAscension(24, 0, 0.0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                new RightAscension(24, 0, 0.0));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor_NegativeMinutes_ThrowsArgumentOutOfRange()
         {
-            _ = new RightAscension(0, -1, 0.0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                new RightAscension(0, -1, 0.0));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor_Minutes60_ThrowsArgumentOutOfRange()
         {
-            _ = new RightAscension(0, 60, 0.0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                new RightAscension(0, 60, 0.0));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor_NegativeSeconds_ThrowsArgumentOutOfRange()
         {
-            _ = new RightAscension(0, 0, -0.001);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                new RightAscension(0, 0, -0.001));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void Constructor_Seconds60_ThrowsArgumentOutOfRange()
         {
-            _ = new RightAscension(0, 0, 60.0);
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+                new RightAscension(0, 0, 60.0));
         }
 
         // ────────────────────────────────────────────────────────────────
@@ -211,7 +211,7 @@ namespace HVO.Astronomy.Tests
         //  Round-trip: Constructor → Properties
         // ────────────────────────────────────────────────────────────────
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(0, 0, 0.0)]
         [DataRow(1, 0, 0.0)]
         [DataRow(12, 30, 0.0)]
@@ -230,7 +230,7 @@ namespace HVO.Astronomy.Tests
         //  Round-trip: FromDegrees → Degrees
         // ────────────────────────────────────────────────────────────────
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(0.0)]
         [DataRow(45.0)]
         [DataRow(90.0)]

@@ -116,7 +116,7 @@ namespace HVO.Weather
         public static double StationToSensorPressure(double pressureHPa, double sensorElevationM, double stationElevationM, Temperature temperature)
         {
             var barometer = BarometricPressure.FromMillibars(pressureHPa);
-            return BarometricPressure.FromInchesHg(barometer.InchesHg / Power10(0.00813 * MToFt(sensorElevationM - stationElevationM) / temperature.Rankine)).Millibars;
+            return BarometricPressure.FromInchesHg(barometer.InchesHg / Math.Pow(10, 0.00813 * MToFt(sensorElevationM - stationElevationM) / temperature.Rankine)).Millibars;
         }
 
         /// <summary>
@@ -133,43 +133,43 @@ namespace HVO.Weather
             switch (algorithm)
             {
                 case AltimeterAlgorithm.ASOS:
-                    return BarometricPressure.FromInchesHg(Power(Power(barometer.InchesHg, 0.1903) + (1.313E-5 * MToFt(elevationM)), 5.255)).Millibars;
+                    return BarometricPressure.FromInchesHg(Math.Pow(Math.Pow(barometer.InchesHg, 0.1903) + (1.313E-5 * MToFt(elevationM)), 5.255)).Millibars;
 
                 case AltimeterAlgorithm.ASOS2:
                     {
                         var geopEl = GeopotentialAltitude(elevationM);
                         var k1 = StandardLapseRate * GasConstantAir / Gravity; // ≈0.190263
-                        var k2 = 8.41728638E-5; // (StandardLapseRate / StandardTempK) * Power(StandardSLP, k1)
-                        return Power(Power(pressureHPa, k1) + (k2 * geopEl), 1 / k1);
+                        var k2 = 8.41728638E-5; // (StandardLapseRate / StandardTempK) * Math.Pow(StandardSLP, k1)
+                        return Math.Pow(Math.Pow(pressureHPa, k1) + (k2 * geopEl), 1 / k1);
                     }
 
                 case AltimeterAlgorithm.MADIS:
                     {
                         var k1 = 0.190284;
-                        var k2 = 8.4184960528E-5; // (StandardLapseRate / StandardTempK) * Power(StandardSLP, k1)
-                        return Power(Power(pressureHPa - 0.3, k1) + (k2 * elevationM), 1 / k1);
+                        var k2 = 8.4184960528E-5; // (StandardLapseRate / StandardTempK) * Math.Pow(StandardSLP, k1)
+                        return Math.Pow(Math.Pow(pressureHPa - 0.3, k1) + (k2 * elevationM), 1 / k1);
                     }
 
                 case AltimeterAlgorithm.NOAA:
                     {
                         var k1 = 0.190284;
-                        var k2 = 8.42288069E-5; // (StandardLapseRate / 288) * Power(StandardSLP, k1)
-                        return (pressureHPa - 0.3) * Power(1 + (k2 * (elevationM / Power(pressureHPa - 0.3, k1))), 1 / k1);
+                        var k2 = 8.42288069E-5; // (StandardLapseRate / 288) * Math.Pow(StandardSLP, k1)
+                        return (pressureHPa - 0.3) * Math.Pow(1 + (k2 * (elevationM / Math.Pow(pressureHPa - 0.3, k1))), 1 / k1);
                     }
 
                 case AltimeterAlgorithm.WOB:
                     {
                         var k1 = StandardLapseRate * GasConstantAir / Gravity; // ≈0.190263
-                        var k2 = 1.312603E-5; // (StandardLapseRateFt / StandardTempK) * Power(StandardSlpInHg, k1)
-                        return BarometricPressure.FromInchesHg(Power(Power(barometer.InchesHg, k1) + (k2 * MToFt(elevationM)), 1 / k1)).Millibars;
+                        var k2 = 1.312603E-5; // (StandardLapseRateFt / StandardTempK) * Math.Pow(StandardSlpInHg, k1)
+                        return BarometricPressure.FromInchesHg(Math.Pow(Math.Pow(barometer.InchesHg, k1) + (k2 * MToFt(elevationM)), 1 / k1)).Millibars;
                     }
 
                 case AltimeterAlgorithm.SMT:
                     {
                         var k1 = 0.190284;
-                        var k2 = 4.30899E-5; // (StandardLapseRate / 288) * Power(StandardSlpInHg, k1)
+                        var k2 = 4.30899E-5; // (StandardLapseRate / 288) * Math.Pow(StandardSlpInHg, k1)
                         var geopEl = GeopotentialAltitude(elevationM);
-                        return BarometricPressure.FromInchesHg((barometer.InchesHg - 0.01) * Power(1 + (k2 * (geopEl / Power(barometer.InchesHg - 0.01, k1))), 1 / k1)).Millibars;
+                        return BarometricPressure.FromInchesHg((barometer.InchesHg - 0.01) * Math.Pow(1 + (k2 * (geopEl / Math.Pow(barometer.InchesHg - 0.01, k1))), 1 / k1)).Millibars;
                     }
 
                 default:
@@ -203,7 +203,7 @@ namespace HVO.Weather
         public static double SensorToStationPressure(double pressureHPa, double sensorElevationM, double stationElevationM, Temperature temperature)
         {
             var barometer = BarometricPressure.FromMillibars(pressureHPa);
-            return BarometricPressure.FromInchesHg(barometer.InchesHg * Power10(0.00813 * MToFt(sensorElevationM - stationElevationM) / temperature.Rankine)).Millibars;
+            return BarometricPressure.FromInchesHg(barometer.InchesHg * Math.Pow(10, 0.00813 * MToFt(sensorElevationM - stationElevationM) / temperature.Rankine)).Millibars;
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace HVO.Weather
                             hCorr = (9.0 / 5.0) * HumidityCorrection(currentTemperature, elevationM, humidity, VapAlgorithm.DavisVP);
                         }
 
-                        return Power(10, (MToFt(elevationM) / (122.8943111 * (meanTemperature.Fahrenheit + 460 + (MToFt(elevationM) * VpLapseRateUS / 2) + hCorr))));
+                        return Math.Pow(10, (MToFt(elevationM) / (122.8943111 * (meanTemperature.Fahrenheit + 460 + (MToFt(elevationM) * VpLapseRateUS / 2) + hCorr))));
                     }
 
                 case SLPAlgorithm.Univie:
@@ -311,13 +311,13 @@ namespace HVO.Weather
                     return 6.112 * Math.Exp(17.67 * temperature.Celsius / (temperature.Celsius + 243.5));
 
                 case VapAlgorithm.TetenNWS:
-                    return 6.112 * Power(10, (7.5 * temperature.Celsius / (temperature.Celsius + 237.7)));
+                    return 6.112 * Math.Pow(10, (7.5 * temperature.Celsius / (temperature.Celsius + 237.7)));
 
                 case VapAlgorithm.TetenMurray:
-                    return Power(10, (7.5 * temperature.Celsius / (237.5 + temperature.Celsius)) + 0.7858);
+                    return Math.Pow(10, (7.5 * temperature.Celsius / (237.5 + temperature.Celsius)) + 0.7858);
 
                 case VapAlgorithm.Teten:
-                    return 6.1078 * Power(10, (7.5 * temperature.Celsius / (temperature.Celsius + 237.3)));
+                    return 6.1078 * Math.Pow(10, (7.5 * temperature.Celsius / (temperature.Celsius + 237.3)));
 
                 default:
                     return 0;
@@ -412,7 +412,7 @@ namespace HVO.Weather
             }
             else
             {
-                double windPow = Power(windSpeedKmph, 0.16);
+                double windPow = Math.Pow(windSpeedKmph, 0.16);
                 result = 13.12 + (0.6215 * temperature.Celsius) - (11.37 * windPow) + (0.3965 * temperature.Celsius * windPow);
             }
 
@@ -517,31 +517,5 @@ namespace HVO.Weather
         /// <param name="value">The value in kilometers.</param>
         /// <returns>The value in miles.</returns>
         public static double KmToMiles(double value) => value / 1.609344;
-
-        /// <summary>
-        /// Raises a base to the given power using logarithmic computation.
-        /// </summary>
-        private static double Power(double b, double exponent)
-        {
-            if (exponent == 0.0)
-                return 1.0;
-            else if (b == 0.0 && exponent > 0.0)
-                return 0.0;
-            else
-                return Math.Exp(exponent * Math.Log(b));
-        }
-
-        /// <summary>
-        /// Computes 10 raised to the given power.
-        /// </summary>
-        private static double Power10(double exponent)
-        {
-            const double ln10 = 2.302585093; // Ln(10)
-
-            if (exponent == 0.0)
-                return 1.0;
-            else
-                return Math.Exp(exponent * ln10);
-        }
     }
 }

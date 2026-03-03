@@ -27,16 +27,16 @@ public class DirectionTests
     [TestMethod]
     public void Constructor_NegativeDegrees_ThrowsException()
     {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction(-1));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new Direction(-1));
     }
 
     [TestMethod]
     public void Constructor_Over360Degrees_ThrowsException()
     {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Direction(361));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new Direction(361));
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(0, CompassPoint.N)]
     [DataRow(45, CompassPoint.NE)]
     [DataRow(90, CompassPoint.E)]
@@ -51,7 +51,7 @@ public class DirectionTests
         Assert.AreEqual(expected, dir.CardinalPoint);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(22, CompassPoint.NNE)]
     [DataRow(68, CompassPoint.ENE)]
     [DataRow(112, CompassPoint.ESE)]

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace HVO.Core.Options;
@@ -14,7 +15,7 @@ namespace HVO.Core.Options;
 /// rationale. This enables fallback access to the original JSON when deserialization to
 /// <typeparamref name="T"/> fails or is deferred.</para>
 /// </remarks>
-public readonly struct Option<T> where T : notnull
+public readonly struct Option<T> : IEquatable<Option<T>> where T : notnull
 {
     private readonly T? _value;
     private readonly bool _hasValue;
@@ -72,4 +73,28 @@ public readonly struct Option<T> where T : notnull
     /// </summary>
     /// <returns>The value's string representation, or "&lt;None&gt;" if no value is present</returns>
     public override string ToString() => HasValue ? Value?.ToString() ?? "" : "<None>";
+
+    /// <inheritdoc />
+    public bool Equals(Option<T> other)
+    {
+        if (HasValue != other.HasValue) return false;
+        if (!HasValue) return true;
+        return EqualityComparer<T>.Default.Equals(_value!, other._value!);
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is Option<T> other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        if (!HasValue) return 0;
+        return EqualityComparer<T>.Default.GetHashCode(_value!);
+    }
+
+    /// <summary>Equality operator</summary>
+    public static bool operator ==(Option<T> left, Option<T> right) => left.Equals(right);
+
+    /// <summary>Inequality operator</summary>
+    public static bool operator !=(Option<T> left, Option<T> right) => !left.Equals(right);
 }

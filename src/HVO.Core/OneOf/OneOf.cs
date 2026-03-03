@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace HVO.Core.OneOf;
@@ -15,7 +16,7 @@ namespace HVO.Core.OneOf;
 /// to distinguish "intentionally holds T1" from "uninitialized". Always construct instances via
 /// <see cref="FromT1"/> or <see cref="FromT2"/>.</para>
 /// </remarks>
-public readonly struct OneOf<T1, T2> : IOneOf
+public readonly struct OneOf<T1, T2> : IOneOf, IEquatable<OneOf<T1, T2>>
 {
     private readonly int _index;
     private readonly T1? _value1;
@@ -162,6 +163,38 @@ public readonly struct OneOf<T1, T2> : IOneOf
     /// </summary>
     /// <returns>The string representation of the value, or <see cref="string.Empty"/> if null</returns>
     public override string ToString() => Value?.ToString() ?? string.Empty;
+
+    /// <inheritdoc />
+    public bool Equals(OneOf<T1, T2> other)
+    {
+        if (_index != other._index) return false;
+        return _index switch
+        {
+            0 => EqualityComparer<T1>.Default.Equals(_value1!, other._value1!),
+            1 => EqualityComparer<T2>.Default.Equals(_value2!, other._value2!),
+            _ => true
+        };
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is OneOf<T1, T2> other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return _index switch
+        {
+            0 => (_index, EqualityComparer<T1>.Default.GetHashCode(_value1!)).GetHashCode(),
+            1 => (_index, EqualityComparer<T2>.Default.GetHashCode(_value2!)).GetHashCode(),
+            _ => _index.GetHashCode()
+        };
+    }
+
+    /// <summary>Equality operator</summary>
+    public static bool operator ==(OneOf<T1, T2> left, OneOf<T1, T2> right) => left.Equals(right);
+
+    /// <summary>Inequality operator</summary>
+    public static bool operator !=(OneOf<T1, T2> left, OneOf<T1, T2> right) => !left.Equals(right);
 }
 
 /// <summary>
@@ -174,7 +207,7 @@ public readonly struct OneOf<T1, T2> : IOneOf
 /// <para><b>default warning:</b> <c>default(OneOf&lt;T1,T2,T3&gt;)</c> has <c>_index == 0</c>,
 /// appearing as T1 with a null/default value. Always use the <c>FromT*</c> factory methods.</para>
 /// </remarks>
-public readonly struct OneOf<T1, T2, T3> : IOneOf
+public readonly struct OneOf<T1, T2, T3> : IOneOf, IEquatable<OneOf<T1, T2, T3>>
 {
     private readonly int _index;
     private readonly T1? _value1;
@@ -364,6 +397,40 @@ public readonly struct OneOf<T1, T2, T3> : IOneOf
     /// </summary>
     /// <returns>The string representation of the value, or <see cref="string.Empty"/> if null</returns>
     public override string ToString() => Value?.ToString() ?? string.Empty;
+
+    /// <inheritdoc />
+    public bool Equals(OneOf<T1, T2, T3> other)
+    {
+        if (_index != other._index) return false;
+        return _index switch
+        {
+            0 => EqualityComparer<T1>.Default.Equals(_value1!, other._value1!),
+            1 => EqualityComparer<T2>.Default.Equals(_value2!, other._value2!),
+            2 => EqualityComparer<T3>.Default.Equals(_value3!, other._value3!),
+            _ => true
+        };
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is OneOf<T1, T2, T3> other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return _index switch
+        {
+            0 => (_index, EqualityComparer<T1>.Default.GetHashCode(_value1!)).GetHashCode(),
+            1 => (_index, EqualityComparer<T2>.Default.GetHashCode(_value2!)).GetHashCode(),
+            2 => (_index, EqualityComparer<T3>.Default.GetHashCode(_value3!)).GetHashCode(),
+            _ => _index.GetHashCode()
+        };
+    }
+
+    /// <summary>Equality operator</summary>
+    public static bool operator ==(OneOf<T1, T2, T3> left, OneOf<T1, T2, T3> right) => left.Equals(right);
+
+    /// <summary>Inequality operator</summary>
+    public static bool operator !=(OneOf<T1, T2, T3> left, OneOf<T1, T2, T3> right) => !left.Equals(right);
 }
 
 /// <summary>
@@ -377,7 +444,7 @@ public readonly struct OneOf<T1, T2, T3> : IOneOf
 /// <para><b>default warning:</b> <c>default(OneOf&lt;T1,T2,T3,T4&gt;)</c> has <c>_index == 0</c>,
 /// appearing as T1 with a null/default value. Always use the <c>FromT*</c> factory methods.</para>
 /// </remarks>
-public readonly struct OneOf<T1, T2, T3, T4> : IOneOf
+public readonly struct OneOf<T1, T2, T3, T4> : IOneOf, IEquatable<OneOf<T1, T2, T3, T4>>
 {
     private readonly int _index;
     private readonly T1? _value1;
@@ -610,4 +677,40 @@ public readonly struct OneOf<T1, T2, T3, T4> : IOneOf
     /// </summary>
     /// <returns>The string representation of the value, or <see cref="string.Empty"/> if null</returns>
     public override string ToString() => Value?.ToString() ?? string.Empty;
+
+    /// <inheritdoc />
+    public bool Equals(OneOf<T1, T2, T3, T4> other)
+    {
+        if (_index != other._index) return false;
+        return _index switch
+        {
+            0 => EqualityComparer<T1>.Default.Equals(_value1!, other._value1!),
+            1 => EqualityComparer<T2>.Default.Equals(_value2!, other._value2!),
+            2 => EqualityComparer<T3>.Default.Equals(_value3!, other._value3!),
+            3 => EqualityComparer<T4>.Default.Equals(_value4!, other._value4!),
+            _ => true
+        };
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is OneOf<T1, T2, T3, T4> other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return _index switch
+        {
+            0 => (_index, EqualityComparer<T1>.Default.GetHashCode(_value1!)).GetHashCode(),
+            1 => (_index, EqualityComparer<T2>.Default.GetHashCode(_value2!)).GetHashCode(),
+            2 => (_index, EqualityComparer<T3>.Default.GetHashCode(_value3!)).GetHashCode(),
+            3 => (_index, EqualityComparer<T4>.Default.GetHashCode(_value4!)).GetHashCode(),
+            _ => _index.GetHashCode()
+        };
+    }
+
+    /// <summary>Equality operator</summary>
+    public static bool operator ==(OneOf<T1, T2, T3, T4> left, OneOf<T1, T2, T3, T4> right) => left.Equals(right);
+
+    /// <summary>Inequality operator</summary>
+    public static bool operator !=(OneOf<T1, T2, T3, T4> left, OneOf<T1, T2, T3, T4> right) => !left.Equals(right);
 }

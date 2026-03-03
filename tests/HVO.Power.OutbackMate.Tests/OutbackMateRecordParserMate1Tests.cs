@@ -255,17 +255,17 @@ public class OutbackMateRecordParserMate1Tests
     #region Edge Cases
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void ParseMate1_NullInput_ThrowsArgumentNullException()
     {
-        OutbackMateRecordParser.ParseMate1(DateTimeOffset.UtcNow, null!);
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            OutbackMateRecordParser.ParseMate1(DateTimeOffset.UtcNow, null!));
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void ParseMate1_EmptyInput_ThrowsArgumentNullException()
     {
-        OutbackMateRecordParser.ParseMate1(DateTimeOffset.UtcNow, "");
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+            OutbackMateRecordParser.ParseMate1(DateTimeOffset.UtcNow, ""));
     }
 
     [TestMethod]
