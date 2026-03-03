@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <PackageId>HVO.NinaClient</PackageId>
+    <Version>1.0.0</Version>
+    <Description>NINA (Nighttime Imaging 'N' Astronomy) API client — REST and WebSocket integration for camera, mount, dome, focuser, filter wheel, guider, rotator, safety monitor, flat device, sequencer, and imaging control.</Description>
+    <PackageTags>hvo;nina;astronomy;astrophotography;telescope;camera;imaging;api-client;equipment-control</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <RootNamespace>HVO.NinaClient</RootNamespace>
+    <SignAssembly>false</SignAssembly>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.10" />
+    <PackageReference Include="System.Text.Json" Version="9.0.5" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HVO.Core\HVO.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>
