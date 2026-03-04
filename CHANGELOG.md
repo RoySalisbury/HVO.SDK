@@ -4,6 +4,32 @@ All notable changes documented here. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-04
+
+### Added
+
+- **HVO.Astronomy 1.0.0** — Sun, Moon, and planet position calculations; twilight and rise/set computations; coordinate transformations (initial NuGet release)
+- **HVO.Astronomy.TheSkyX 1.0.0** — TheSkyX telescope control library for mount slewing, object lookup, and equipment management (initial NuGet release)
+- **HVO.Weather 1.0.0** — Weather data models, CWOP/APRS formatter, and Weather Underground uploader (initial NuGet release)
+- **HVO.Weather.DavisVantagePro 1.0.0** — Davis Vantage Pro serial protocol driver for weather station communication (initial NuGet release)
+- **HVO.Power.OutbackMate 1.0.0** — Outback MATE serial protocol driver for solar power system monitoring (initial NuGet release)
+- **HVO.NinaClient 1.0.0** — N.I.N.A. REST API client for camera, mount, and equipment control (initial NuGet release)
+
+### Changed
+
+- **HVO.Iot.Devices 1.2.0** — Added MLX90614, SI1145, TSL2591, HTU21DF, DS3231M, MCP23008, and MCP23017 I2C sensor/expander drivers. Updated `System.IO.Ports` to 10.0.3.
+- Comprehensive code review improvements across all packages (#37)
+- Incremental CI — build and test only affected projects (#38)
+- Grouped dependabot configuration for cleaner dependency updates (#39)
+
+### Dependencies
+
+- `System.IO.Ports` 8.0.0 → 10.0.3
+- `Microsoft.Extensions.*` packages updated to 10.0.3
+- `SkiaSharp.*` packages updated to 3.119.2
+- `FluentAssertions` 8.7.1 → 8.8.0
+- `Microsoft.NET.Test.Sdk` and `MSTest` updated to latest
+
 ## [1.2.0] - 2026-03-02
 
 ### Changed
