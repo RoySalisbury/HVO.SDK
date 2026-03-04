@@ -14,8 +14,14 @@ on:
           - HVO.Core
           - HVO.Core.SourceGenerators
           - HVO.Iot.Devices
+          - HVO.Astronomy
           - HVO.Astronomy.CFITSIO
           - HVO.Astronomy.CFITSIO.NativeAssets
+          - HVO.Astronomy.TheSkyX
+          - HVO.Weather
+          - HVO.Weather.DavisVantagePro
+          - HVO.Power.OutbackMate
+          - HVO.NinaClient
           - HVO.ZWOOptical.ASISDK
       target:
         description: 'Publish target'
