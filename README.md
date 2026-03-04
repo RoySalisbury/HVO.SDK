@@ -161,6 +161,8 @@ dotnet test
 |----------|-------------|
 | [CONTRIBUTING.md](CONTRIBUTING.md) | PR workflow, coding standards, branch naming |
 | [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes |
+| [Testing](docs/testing.md) | Test projects, coverage settings, local commands |
+| [Pipeline Integration](docs/pipeline-integration.md) | CI workflow, tag-based publishing, coordination with telemetry |
 
 ## Contributing
 

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>HVO.Core.SourceGenerators</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Description>Roslyn source generators for HVO.Core — generates discriminated union implementations from [NamedOneOf] attributes.</Description>
     <PackageTags>hvo;core;source-generator;roslyn;oneof;discriminated-union;codegen</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>

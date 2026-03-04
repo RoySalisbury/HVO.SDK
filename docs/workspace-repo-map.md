@@ -41,8 +41,8 @@ This document catalogs all repositories in the HVO multi-repo workspace, their p
 
 | Package | TFM | Version | Description |
 |---------|-----|---------|-------------|
-| `HVO.Core` | ns2.0 | 1.1.0 | Result\<T\>, Option\<T\>, OneOf, Guard, Ensure, extensions |
-| `HVO.Core.SourceGenerators` | ns2.0 | 1.1.0 | Roslyn source generators (`[NamedOneOf]`) |
+| `HVO.Core` | ns2.0 | 1.1.1 | Result\<T\>, Option\<T\>, OneOf, Guard, Ensure, extensions |
+| `HVO.Core.SourceGenerators` | ns2.0 | 1.1.1 | Roslyn source generators (`[NamedOneOf]`) |
 | `HVO.Iot.Devices` | net8.0 | 1.2.0 | GPIO/I2C abstractions, limit switches, relay hats, buttons, I2C sensors |
 | `HVO.ZWOOptical.ASISDK` | ns2.0 | 0.0.4 | ZWO ASI camera SDK P/Invoke wrapper |
 | `HVO.Astronomy` | ns2.0 | 1.0.0 | Sun/Moon/planet positions, sunrise/sunset, twilight, moon phase, Lat/Lon types, coordinate transforms |
