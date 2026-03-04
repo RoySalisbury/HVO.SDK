@@ -28,7 +28,7 @@ All notable changes documented here. Format: [Keep a Changelog](https://keepacha
 - `Microsoft.Extensions.*` packages updated to 10.0.3
 - `SkiaSharp.*` packages updated to 3.119.2
 - `FluentAssertions` 8.7.1 → 8.8.0
-- `Microsoft.NET.Test.Sdk` and `MSTest` updated to latest
+- `Microsoft.NET.Test.Sdk` updated to 18.3.0; `MSTest` updated to 4.1.0
 
 ## [1.2.0] - 2026-03-02
 
