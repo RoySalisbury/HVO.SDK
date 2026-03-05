@@ -3,7 +3,7 @@ name: NuGet Pack & Publish
 on:
   push:
     tags:
-      - 'v*'  # e.g., v1.0.0, v1.2.0-preview.1
+      - '**/v*'  # e.g., HVO.Core/v1.1.1, HVO.Astronomy/v1.0.1
   workflow_dispatch:
     inputs:
       package:
@@ -89,8 +89,9 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             PACKAGE_NAME="${{ github.event.inputs.package }}"
           else
-            # Tag push publishes all packages
-            PACKAGE_NAME="*"
+            # Extract package name from tag: "HVO.Core/v1.1.1" -> "HVO.Core"
+            TAG="${GITHUB_REF#refs/tags/}"
+            PACKAGE_NAME="${TAG%%/v*}"
           fi
           echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "Publishing package: ${PACKAGE_NAME}"
@@ -127,7 +128,9 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             PACKAGE_NAME="${{ github.event.inputs.package }}"
           else
-            PACKAGE_NAME="*"
+            # Extract package name from tag: "HVO.Core/v1.1.1" -> "HVO.Core"
+            TAG="${GITHUB_REF#refs/tags/}"
+            PACKAGE_NAME="${TAG%%/v*}"
           fi
           echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "Publishing package: ${PACKAGE_NAME}"
