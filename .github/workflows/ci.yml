@@ -385,7 +385,7 @@ jobs:
           fi
 
       - name: Publish test results
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         if: always() && steps.projects.outputs.skip != 'true'
         continue-on-error: true
         with:
