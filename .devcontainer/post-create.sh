@@ -26,7 +26,7 @@ _load_base_script() {
 	return 1
 }
 
-BASE_SCRIPT=$(_load_base_script)
+BASE_SCRIPT=$(_load_base_script || true)
 if [ -n "$BASE_SCRIPT" ]; then
 	eval "$BASE_SCRIPT"
 else
@@ -74,7 +74,10 @@ fi
 dotnet tool install --global dotnet-reportgenerator-globaltool 2>/dev/null || true
 
 # Restore NuGet packages
-dotnet restore || echo "Warning: dotnet restore failed, continuing..."
+if ! dotnet restore; then
+	echo "Error: dotnet restore failed. See output above."
+	exit 1
+fi
 
 echo
 echo "Post-create setup completed successfully!"
