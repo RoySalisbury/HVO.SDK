@@ -6,9 +6,7 @@
 set -e
 
 HVOSDK_ENV_GIST="1f014918502877f0c37738fa733dad65"
-BASE_GIST="bceb71a9120e4d393b68308a03399ca5"
 ENV_FILE="/workspaces/HVO.SDK/.env"
-WORKSPACE="/workspaces/HVO.SDK"
 
 # ── Ensure .env sourcing + one-shot fetch hook in .zshrc (idempotent) ─
 ZSHRC="$HOME/.zshrc"
@@ -62,7 +60,7 @@ if [ -z "$env_content" ]; then
 	exit 0
 fi
 
-echo "$env_content" > "$ENV_FILE"
+printf '%s\n' "$env_content" > "$ENV_FILE"
 chmod 600 "$ENV_FILE"
 echo "✅ .env written to $ENV_FILE"
 
