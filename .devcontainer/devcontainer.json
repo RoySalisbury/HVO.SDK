@@ -1,79 +1,56 @@
 {
-  "name": "HVO.SDK Dev Container",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  "hostRequirements": {
-    "cpus": 2,
-    "memory": "4gb",
-    "storage": "8gb"
-  },
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {
-      "ppa": true,
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "installDirectlyFromGitHubRelease": true,
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "installOhMyZsh": true,
-      "configureZshAsDefaultShell": true,
-      "username": "vscode",
-      "userUid": "automatic",
-      "userGid": "automatic",
-      "upgradePackages": false
-    },
-    "ghcr.io/devcontainers/features/dotnet:2": {
-      "version": "10.0"
-    }
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-dotnettools.csdevkit",
-        "ms-dotnettools.csharp",
-        "ms-dotnettools.vscode-dotnet-runtime",
-        "GitHub.copilot",
-        "GitHub.copilot-chat",
-        "github.vscode-github-actions"
-      ],
-      "settings": {
-        "omnisharp.enableRoslynAnalyzers": true,
-        "omnisharp.enableEditorConfigSupport": true,
-        "omnisharp.enableImportCompletion": true,
-        "csharp.semanticHighlighting.enabled": true,
-        "editor.formatOnSave": true,
-        "editor.formatOnType": true,
-        "editor.codeActionsOnSave": {
-          "source.fixAll": "explicit",
-          "source.organizeImports": "explicit"
-        },
-        "terminal.integrated.defaultProfile.linux": "zsh",
-        "terminal.integrated.profiles.linux": {
-          "zsh": {
-            "path": "/bin/zsh"
-          },
-          "bash": {
-            "path": "/bin/bash"
-          }
-        },
-        "terminal.integrated.shellIntegration.enabled": true,
-        "terminal.integrated.shellIntegration.decorationsEnabled": "both",
-        "terminal.integrated.stickyScroll.enabled": true,
-        "terminal.integrated.suggest.enabled": true
-      }
-    }
-  },
-  "containerEnv": {
-    "DOTNET_ENVIRONMENT": "Development"
-  },
-  "remoteEnv": {
-    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
-    "GH_TOKEN": "${localEnv:GH_TOKEN}"
-  },
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "remoteUser": "vscode"
+	"name": "HVO.SDK Dev Container",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"hostRequirements": {
+		"cpus": 2,
+		"memory": "4gb",
+		"storage": "8gb"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/dotnet:2": {
+			"version": "10.0"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"installOhMyZsh": true,
+			"configureZshAsDefaultShell": true,
+			"username": "vscode",
+			"upgradePackages": false
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.csharp",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"github.vscode-github-actions"
+			],
+			"settings": {
+				"csharp.semanticHighlighting.enabled": true,
+				"editor.formatOnSave": true,
+				"editor.formatOnType": true,
+				"editor.codeActionsOnSave": {
+					"source.fixAll": "explicit",
+					"source.organizeImports": "explicit"
+				},
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": { "path": "/bin/zsh" },
+					"bash": { "path": "/bin/bash" }
+				}
+			}
+		}
+	},
+	"containerEnv": {
+		"DOTNET_ENVIRONMENT": "Development"
+	},
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"postAttachCommand": "bash .devcontainer/post-attach.sh",
+	"remoteUser": "vscode"
 }
