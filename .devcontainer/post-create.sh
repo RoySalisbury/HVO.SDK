@@ -70,10 +70,16 @@ fi
 # HVO.SDK-specific setup
 # ─────────────────────────────────────────────────────────────────────
 
+# Ensure .NET tools are on PATH
+export PATH="$PATH:/home/vscode/.dotnet/tools"
+grep -qF '.dotnet/tools' /home/vscode/.zshrc 2>/dev/null || \
+	echo 'export PATH="$PATH:/home/vscode/.dotnet/tools"' >> /home/vscode/.zshrc
+
 # Install global .NET tools
 dotnet tool install --global dotnet-reportgenerator-globaltool 2>/dev/null || true
 
-# Restore NuGet packages
+# Clean stale obj dirs that can cause restore conflicts, then restore
+find /workspaces/HVO.SDK -name 'project.assets.json' -delete 2>/dev/null || true
 if ! dotnet restore; then
 	echo "Error: dotnet restore failed. See output above."
 	exit 1
