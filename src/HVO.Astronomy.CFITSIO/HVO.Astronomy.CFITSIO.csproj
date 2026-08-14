@@ -11,8 +11,8 @@
     <RootNamespace>HVO.Astronomy.CFITSIO</RootNamespace>
     <AssemblyName>HVO.Astronomy.CFITSIO</AssemblyName>
     <PackageId>HVO.Astronomy.CFITSIO</PackageId>
-    <Version>1.0.4</Version>
-    <Description>CFITSIO native binaries for P/Invoke (macOS/Linux/Windows, multi-RID).</Description>
+    <Version>2.0.0</Version>
+    <Description>Managed CFITSIO wrapper with bundled native binaries for Linux ARM64 and macOS ARM64.</Description>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageTags>Astronomy,FITS</PackageTags>
   </PropertyGroup>
@@ -24,10 +24,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="3.119.2" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" PrivateAssets="all" />
-    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.2" PrivateAssets="all" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.2" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp" Version="4.151.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.151.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="4.151.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.151.1" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../HVO.Core/HVO.Core.csproj" PrivateAssets="All" />
+    <ProjectReference Include="../HVO.Core/HVO.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

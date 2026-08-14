@@ -11,8 +11,8 @@
     <IncludeSymbols>false</IncludeSymbols>
 
     <PackageId>HVO.Astronomy.CFITSIO.NativeAssets</PackageId>
-    <Version>1.0.4</Version>
-    <Description>Native CFITSIO binaries for multiple platforms (macOS/Linux/Windows, multi-RID). This package contains only native assets and is referenced by HVO.Astronomy.CFITSIO.</Description>
+    <Version>1.0.5</Version>
+    <Description>Native CFITSIO binaries for Linux ARM64 and macOS ARM64. This package contains only native assets and is referenced by HVO.Astronomy.CFITSIO.</Description>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageTags>Astronomy,FITS,Native</PackageTags>
   </PropertyGroup>

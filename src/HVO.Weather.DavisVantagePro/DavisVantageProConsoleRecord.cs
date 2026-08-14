@@ -119,7 +119,7 @@ namespace HVO.Weather.DavisVantagePro
                 OutsideTemperature = (outsideTemperature == short.MaxValue) ? null : Temperature.FromFahrenheit(outsideTemperature / 10.0),
                 RainRate = (rainRate == ushort.MaxValue) ? (double?)null : rainRate / 100.0,
                 SolarRadiation = (solarRadiation == short.MaxValue) ? (ushort?)null : solarRadiation,
-                StormRain = (stormRain == short.MaxValue) ? (double?)null : stormRain / 100.0,
+                StormRain = (stormRain == ushort.MaxValue) ? (double?)null : stormRain / 100.0,
                 StormStartDate = parsedStormStartDate,
                 SunriseTime = ParseTime(sunriseTime),
                 SunsetTime = ParseTime(sunsetTime),
@@ -144,6 +144,11 @@ namespace HVO.Weather.DavisVantagePro
         /// </remarks>
         public static bool ValidatePacketCrc(byte[] rawDataRecord)
         {
+            if (rawDataRecord == null || rawDataRecord.Length < 99)
+            {
+                return false;
+            }
+
             using (var crc16 = new Crc16())
             {
                 byte[] calculatedCrc = crc16.ComputeHash(rawDataRecord, 0, 97);

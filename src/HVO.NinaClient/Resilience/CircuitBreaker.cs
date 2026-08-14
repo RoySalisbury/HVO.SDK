@@ -1,5 +1,7 @@
 using HVO.Core.Results;
+using HVO.NinaClient.Exceptions;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace HVO.NinaClient.Resilience;
 
@@ -140,6 +142,10 @@ public sealed class CircuitBreaker : IDisposable
 
             return result;
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             // Unexpected exception during operation - treat as failure
@@ -228,6 +234,7 @@ public static class RetryPolicy
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
+        maxAttempts = Math.Max(1, maxAttempts);
         var attempt = 0;
         Exception? lastException = null;
 
@@ -261,6 +268,10 @@ public static class RetryPolicy
 
                 // Don't retry this error - return failure immediately
                 return result;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex) when (ShouldRetry(ex, attempt, maxAttempts))
             {
@@ -297,12 +308,15 @@ public static class RetryPolicy
 
         return exception switch
         {
-            TaskCanceledException => false,     // Operation was cancelled - don't retry
-            ArgumentException => false,         // Invalid arguments - won't succeed on retry
-            HttpRequestException => true,       // Network issues - potentially transient
-            TimeoutException => true,           // Request timeout - might succeed on retry
-            InvalidOperationException => true,  // API logical errors - might be transient
-            _ => true                          // Default: retry other exceptions
+            OperationCanceledException => false,
+            ArgumentException => false,
+            HttpRequestException => true,
+            TimeoutException => true,
+            NinaConnectionException => true,
+            NinaApiHttpException httpException => httpException.StatusCode == HttpStatusCode.RequestTimeout ||
+                httpException.StatusCode == HttpStatusCode.TooManyRequests ||
+                (int?)httpException.StatusCode >= 500,
+            _ => false
         };
     }
 

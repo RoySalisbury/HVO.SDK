@@ -29,7 +29,7 @@ If you're referencing `HVO.Astronomy.CFITSIO` via `<ProjectReference>`, add this
 ```xml
 <ItemGroup>
   <ProjectReference Include="../HVO.Astronomy.CFITSIO/HVO.Astronomy.CFITSIO.csproj" />
-  <PackageReference Include="HVO.Astronomy.CFITSIO.NativeAssets" Version="1.0.3" />
+  <PackageReference Include="HVO.Astronomy.CFITSIO.NativeAssets" Version="1.0.5" />
 </ItemGroup>
 ```
 
@@ -41,4 +41,4 @@ BSD-3-Clause (matching CFITSIO upstream license)
 
 ## Repository
 
-Part of the HVOv9 observatory software suite: https://github.com/RoySalisbury/HVOv9
+Part of HVO.SDK: https://github.com/RoySalisbury/HVO.SDK

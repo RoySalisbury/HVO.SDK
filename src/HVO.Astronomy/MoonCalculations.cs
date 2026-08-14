@@ -55,6 +55,7 @@ namespace HVO.Astronomy
             {
                 azimuth -= 180;
             }
+            azimuth = AstronomyMath.NormalizeDegrees(azimuth);
 
             return moonDistance;
         }

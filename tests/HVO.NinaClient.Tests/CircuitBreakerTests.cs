@@ -38,4 +38,41 @@ public class CircuitBreakerTests
 
         Assert.AreEqual(CircuitBreakerState.Closed, breaker.State);
     }
+
+    [TestMethod]
+    public async Task RetryPolicy_UnknownFailure_IsNotRetried()
+    {
+        var attemptCount = 0;
+
+        var result = await RetryPolicy.ExecuteWithRetryAsync<int>(
+            () =>
+            {
+                attemptCount++;
+                return Task.FromResult(HVO.Core.Results.Result<int>.Failure(new Exception("permanent")));
+            },
+            maxAttempts: 3,
+            baseDelay: TimeSpan.Zero);
+
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreEqual(1, attemptCount);
+    }
+
+    [TestMethod]
+    public async Task RetryPolicy_ZeroAttempts_StillExecutesOperationOnce()
+    {
+        var attemptCount = 0;
+
+        var result = await RetryPolicy.ExecuteWithRetryAsync(
+            () =>
+            {
+                attemptCount++;
+                return Task.FromResult(HVO.Core.Results.Result<int>.Success(42));
+            },
+            maxAttempts: 0,
+            baseDelay: TimeSpan.Zero);
+
+        Assert.IsTrue(result.IsSuccessful);
+        Assert.AreEqual(42, result.Value);
+        Assert.AreEqual(1, attemptCount);
+    }
 }

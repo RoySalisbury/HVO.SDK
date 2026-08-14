@@ -877,7 +877,7 @@ public class GpioButtonWithLed : GpioButtonBase, IAsyncDisposable
             {
                 _logger?.LogDebug("Cleanup - Unregistering callback for pin {ButtonPin}", _buttonPin);
 
-                //_gpioController.UnregisterCallbackForPinValueChangedEvent(_buttonPin, PinStateChanged);
+                _gpioController.UnregisterCallbackForPinValueChangedEvent(_buttonPin, PinStateChanged);
             }
             catch (Exception ex)
             {
@@ -1035,8 +1035,8 @@ public class GpioButtonWithLed : GpioButtonBase, IAsyncDisposable
         {
             _logger?.LogDebug("DisposeAsync - Calling base disposal and suppressing finalization");
 
-            // Call base disposal
-            Dispose(true);
+            // The derived cleanup already ran; dispose the base holding timer directly.
+            base.Dispose(true);
 
             // Suppress finalization
             GC.SuppressFinalize(this);

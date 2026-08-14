@@ -1,10 +1,10 @@
-Applicable platform:
-ubuntu:x86, x64
-armv6: raspberry pi
-armv5: armv5 Soft-Float
-mac os: mac
-armv7: raspberry pi2
-armv8: arm 64bit
+Native assets included in this package:
+
+- Linux ARM (`linux-arm`): Raspberry Pi 2 / ARMv7
+- Linux ARM64 (`linux-arm64`): ARMv8
+- macOS x64 (`osx-x64`): Intel 32/64-bit universal binary
+
+Other platforms require a compatible ZWO ASI SDK native library installed separately.
 
 $ sudo install asi.rules /lib/udev/rules.d
 or
