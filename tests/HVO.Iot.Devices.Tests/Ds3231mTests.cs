@@ -80,6 +80,30 @@ public class Ds3231mTests
         result.Value.Second.Should().Be(59);
     }
 
+    [TestMethod]
+    public void GetDateTime_ClearCenturyBit_UsesTwentyFirstCentury()
+    {
+        var (rtc, client) = CreateRtc();
+        client.WriteBlock(0x00, new byte[] { 0x00, 0x00, 0x00, 0x04, 0x01, 0x01, 0x25 });
+
+        var result = rtc.GetDateTime();
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Value.Year.Should().Be(2025);
+    }
+
+    [TestMethod]
+    public void GetDateTime_TwelveHourClock_DecodesAmAndPm()
+    {
+        var (rtc, client) = CreateRtc();
+        client.WriteBlock(0x00, new byte[] { 0x00, 0x00, 0x52, 0x04, 0x01, 0x01, 0x25 });
+        rtc.GetDateTime().Value.Hour.Should().Be(0);
+
+        client.WriteByte(0x02, 0x61);
+
+        rtc.GetDateTime().Value.Hour.Should().Be(13);
+    }
+
     #endregion
 
     #region SetDateTime
@@ -124,6 +148,41 @@ public class Ds3231mTests
             result.Value.Month.Should().Be(dt.Month);
             result.Value.Day.Should().Be(dt.Day);
         }
+    }
+
+    [TestMethod]
+    public void SetDateTime_YearInNextCentury_RoundTripsCorrectly()
+    {
+        var (rtc, _) = CreateRtc();
+        var expected = new DateTimeOffset(2125, 6, 15, 12, 30, 0, TimeSpan.Zero);
+
+        rtc.SetDateTime(expected).IsSuccessful.Should().BeTrue();
+
+        rtc.GetDateTime().Value.Should().Be(expected);
+    }
+
+    [TestMethod]
+    public void SetDateTime_UnsupportedYear_ReturnsFailure()
+    {
+        var (rtc, _) = CreateRtc();
+
+        var result = rtc.SetDateTime(new DateTimeOffset(1999, 1, 1, 0, 0, 0, TimeSpan.Zero));
+
+        result.IsSuccessful.Should().BeFalse();
+        result.Error.Should().BeOfType<ArgumentOutOfRangeException>();
+    }
+
+    [TestMethod]
+    public void MemoryClient_UnsupportedYear_DoesNotPartiallyUpdateRegisters()
+    {
+        var (rtc, client) = CreateRtc();
+        var expected = new DateTimeOffset(2025, 6, 15, 12, 30, 45, TimeSpan.Zero);
+        client.SetDateTime(expected);
+
+        var action = () => client.SetDateTime(new DateTimeOffset(1999, 1, 2, 3, 4, 5, TimeSpan.Zero));
+
+        action.Should().Throw<ArgumentOutOfRangeException>();
+        rtc.GetDateTime().Value.Should().Be(expected);
     }
 
     #endregion

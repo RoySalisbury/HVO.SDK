@@ -147,6 +147,7 @@ namespace HVO.Astronomy.Tests
             Assert.IsFalse(double.IsNaN(alt), "Altitude should not be NaN");
             Assert.IsFalse(double.IsNaN(az), "Azimuth should not be NaN");
             Assert.IsTrue(alt >= -90 && alt <= 90, $"Altitude should be [-90,90], was {alt}");
+            Assert.IsTrue(az >= 0 && az < 360, $"Azimuth should be [0,360), was {az}");
         }
     }
 }

@@ -1,6 +1,6 @@
 # Testing
 
-All SDK packages use MSTest 3.7 with method-level parallelization enabled in `Directory.Build.props`.  Tests live under `tests/` and mirror the source folder names so every library keeps a dedicated suite.
+All SDK packages use MSTest 4.3.3 with method-level parallelization configured in each test assembly. Tests live under `tests/` and mirror the source folder names so every library keeps a dedicated suite.
 
 ## Project Map
 
@@ -14,8 +14,6 @@ All SDK packages use MSTest 3.7 with method-level parallelization enabled in `Di
 ## Running Tests
 
 ```bash
-cd /workspaces/HVO.Workspace/repos/HVO.SDK
-
 dotnet test HVO.SDK.sln
 ```
 

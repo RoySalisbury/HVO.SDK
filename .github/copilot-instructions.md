@@ -2,28 +2,25 @@
 
 ## Project Overview
 
-**HVO.SDK** is a public .NET library providing shared utilities and functional patterns used across all HVO projects. It publishes two NuGet packages:
-
-- **HVO.Core** — Result<T>, Option<T>, OneOf<T1..T4>, discriminated unions, guard clauses, extensions
-- **HVO.Core.SourceGenerators** — Roslyn source generators (e.g., `[NamedOneOf]` attribute)
+**HVO.SDK** is a public collection of .NET libraries for shared utilities, astronomy, weather, power, imaging, and observatory hardware. It publishes twelve independently versioned NuGet packages; see the root README for the package map.
 
 ## Target Frameworks
 
-- **HVO.Core**: `netstandard2.0` (maximum compatibility — .NET Framework 4.8.1 through .NET 10+)
-- **HVO.Core.SourceGenerators**: `netstandard2.0` (required for Roslyn analyzers)
-- **Tests**: `net10.0` with MSTest 3.7.0
+- General-purpose libraries and source generators: `netstandard2.0`
+- IoT and NINA clients: `net8.0`
+- CFITSIO and tests: `net10.0`
+- Tests use MSTest 4.3.3
 
 ## Critical Compatibility Guidelines
 
 Since HVO.Core targets .NET Standard 2.0:
 
 - **No** `ArgumentNullException.ThrowIfNull()` — use `if (x == null) throw new ArgumentNullException(nameof(x));`
-- **No** `^` and `..` range operators, `init` accessors, records, default interface implementations
 - **No** `ImplicitUsings` — always add explicit `using` statements (disabled project-wide)
 - **Always** include `using System;` and other necessary namespaces explicitly
-- Pattern matching limited to C# 7.x features
+- Modern C# syntax is allowed, but do not use runtime APIs unavailable to the target framework without a compatible package or implementation
 - Use nullable annotations (`?`) but ensure compatibility
-- `System.Text.Json` 8.0.5 is a dependency (for `JsonElement` in `IOneOf`/`Option<T>`)
+- `System.Text.Json` 10.0.11 is a dependency (for `JsonElement` in `IOneOf`/`Option<T>`)
 
 ## Coding Standards
 
@@ -66,7 +63,7 @@ Since HVO.Core targets .NET Standard 2.0:
 ## Publishing
 
 - **Dual publish**: nuget.org (primary) + GitHub Packages (secondary)
-- **Tag-triggered**: Push `v*` tag to publish all packages
+- **Tag-triggered**: Push `<PackageId>/v<SemVer>` to publish that package after ID/version validation
 - **Manual dispatch**: Select specific package and target via workflow_dispatch
 - **Versioning**: SemVer in `.csproj` `<Version>` property
 

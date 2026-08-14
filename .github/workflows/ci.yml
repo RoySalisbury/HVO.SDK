@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, 'feature/**', 'fix/**', 'release/**' ]
+    branches: [ main, 'feature/**', 'fix/**', 'bugfix/**', 'hotfix/**', 'chore/**', 'refactor/**', 'release/**' ]
   pull_request:
     branches: [ main ]
 
@@ -40,7 +40,7 @@ jobs:
       zwo: ${{ steps.detect.outputs.zwo }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -95,14 +95,14 @@ jobs:
           detect_group "core" "^src/HVO\.Core/"
           detect_group "core_generators" "^src/HVO\.Core\.SourceGenerators/"
           detect_group "astronomy" "^src/HVO\.Astronomy/"
-          detect_group "astronomy_cfitsio" "^src/HVO\.Astronomy\.CFITSIO/"
+          detect_group "astronomy_cfitsio" "^src/HVO\.Astronomy\.CFITSIO(/|\.NativeAssets/)"
           detect_group "astronomy_theskyx" "^src/HVO\.Astronomy\.TheSkyX/"
           detect_group "weather" "^src/HVO\.Weather/"
           detect_group "weather_dvp" "^src/HVO\.Weather\.DavisVantagePro/"
           detect_group "power" "^src/HVO\.Power\.OutbackMate/"
           detect_group "nina" "^src/HVO\.NinaClient/"
           detect_group "iot" "^src/HVO\.Iot\.Devices/"
-          detect_group "zwo" "^src/HVO\.ZWOOptical/"
+          detect_group "zwo" "^src/HVO\.ZWOOptical(\.|/)"
 
           # Also detect test-only changes (rebuild the test + its src project)
           if echo "$CHANGED" | grep -qE "^tests/HVO\.Core\.Tests/"; then
@@ -149,14 +149,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: |
-            9.0.x
-            ${{ env.DOTNET_VERSION }}
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Determine projects to build
         id: projects
@@ -284,7 +282,7 @@ jobs:
             --settings tests/coverage.runsettings \
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults \
-            --logger "trx;LogFileName=test-results.trx"
+            --logger trx
 
       # ── Incremental build path ──
       - name: Restore (incremental)
@@ -312,12 +310,13 @@ jobs:
           fi
           for proj in $TEST_PROJECTS; do
             echo "Testing $proj..."
+            project_name=$(basename "$proj" .csproj)
             dotnet test "$proj" \
               --no-build \
               --configuration Release \
               --settings tests/coverage.runsettings \
               --collect:"XPlat Code Coverage" \
-              --results-directory ./TestResults \
+              --results-directory "./TestResults/$project_name" \
               --logger "trx;LogFileName=test-results.trx"
           done
 
@@ -355,42 +354,53 @@ jobs:
             echo "No coverage report found — using defaults"
             LINE_COV=0; BRANCH_COV=0; METHOD_COV=0
           fi
-          echo "line=$LINE_COV" >> "$GITHUB_OUTPUT"
-          echo "branch=$BRANCH_COV" >> "$GITHUB_OUTPUT"
-          echo "method=$METHOD_COV" >> "$GITHUB_OUTPUT"
+          TESTS_PASSED=0
+          TESTS_FAILED=0
+          TESTS_TOTAL=0
+          while IFS= read -r trx; do
+            passed=$(grep -oP 'passed="\K[0-9]+' "$trx" || echo "0")
+            failed=$(grep -oP 'failed="\K[0-9]+' "$trx" || echo "0")
+            total=$(grep -oP 'total="\K[0-9]+' "$trx" || echo "0")
+            TESTS_PASSED=$((TESTS_PASSED + passed))
+            TESTS_FAILED=$((TESTS_FAILED + failed))
+            TESTS_TOTAL=$((TESTS_TOTAL + total))
+          done < <(find TestResults -name '*.trx' -type f 2>/dev/null)
+          {
+            echo "line=$LINE_COV"
+            echo "branch=$BRANCH_COV"
+            echo "method=$METHOD_COV"
+            echo "tests_passed=$TESTS_PASSED"
+            echo "tests_failed=$TESTS_FAILED"
+            echo "tests_total=$TESTS_TOTAL"
+          } >> "$GITHUB_OUTPUT"
 
-          TESTS_PASSED=$(grep -oP 'passed="\K[0-9]+' TestResults/test-results.trx 2>/dev/null || echo "0")
-          TESTS_FAILED=$(grep -oP 'failed="\K[0-9]+' TestResults/test-results.trx 2>/dev/null || echo "0")
-          TESTS_TOTAL=$(grep -oP 'total="\K[0-9]+' TestResults/test-results.trx 2>/dev/null || echo "0")
-          echo "tests_passed=$TESTS_PASSED" >> "$GITHUB_OUTPUT"
-          echo "tests_failed=$TESTS_FAILED" >> "$GITHUB_OUTPUT"
-          echo "tests_total=$TESTS_TOTAL" >> "$GITHUB_OUTPUT"
-
-          echo "### Code Coverage" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Line coverage | ${LINE_COV}% |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Branch coverage | ${BRANCH_COV}% |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Method coverage | ${METHOD_COV}% |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Tests | ${TESTS_PASSED} passed / ${TESTS_TOTAL} total |" >> "$GITHUB_STEP_SUMMARY"
-          if [[ "${{ steps.projects.outputs.scope }}" == "incremental" ]]; then
-            echo "| Scope | Incremental — only affected projects |" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "| Scope | Full — all projects |" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [[ -f coverage-report/SummaryGithub.md ]]; then
-            cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
-          fi
+          {
+            echo "### Code Coverage"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Line coverage | ${LINE_COV}% |"
+            echo "| Branch coverage | ${BRANCH_COV}% |"
+            echo "| Method coverage | ${METHOD_COV}% |"
+            echo "| Tests | ${TESTS_PASSED} passed / ${TESTS_TOTAL} total |"
+            if [[ "${{ steps.projects.outputs.scope }}" == "incremental" ]]; then
+              echo "| Scope | Incremental — only affected projects |"
+            else
+              echo "| Scope | Full — all projects |"
+            fi
+            echo ""
+            if [[ -f coverage-report/SummaryGithub.md ]]; then
+              cat coverage-report/SummaryGithub.md
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish test results
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         if: always() && steps.projects.outputs.skip != 'true'
         continue-on-error: true
         with:
           name: Test Results
-          path: TestResults/test-results.trx
+          path: TestResults/**/*.trx
           reporter: dotnet-trx
           fail-on-empty: false
 
@@ -412,9 +422,9 @@ jobs:
 
       # Dynamic badges via gist (requires GIST_TOKEN secret with gist scope)
       - name: Update line coverage badge
-        if: github.ref == 'refs/heads/main' && always()
+        if: github.ref == 'refs/heads/main' && steps.projects.outputs.scope == 'full' && always()
         continue-on-error: true
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.COVERAGE_GIST_ID }}
@@ -426,9 +436,9 @@ jobs:
           maxColorRange: 80
 
       - name: Update branch coverage badge
-        if: github.ref == 'refs/heads/main' && always()
+        if: github.ref == 'refs/heads/main' && steps.projects.outputs.scope == 'full' && always()
         continue-on-error: true
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.COVERAGE_GIST_ID }}
@@ -440,9 +450,9 @@ jobs:
           maxColorRange: 70
 
       - name: Update tests badge
-        if: github.ref == 'refs/heads/main' && always()
+        if: github.ref == 'refs/heads/main' && steps.projects.outputs.scope == 'full' && always()
         continue-on-error: true
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ secrets.COVERAGE_GIST_ID }}

@@ -12,16 +12,15 @@ SDK packages publish per-package: push a tag that matches `<PackageId>/v<SemVer>
 
 Recommended sequence:
 
-1. **HVO.Core** — always publish the primitives first.  Telemetry and downstream repos consume this package directly.
-2. **HVO.Core.SourceGenerators** — version must stay in lockstep with `HVO.Core` because the generators emit strongly-typed helpers for the primitives.
-3. **Domain libraries** — Astronomy, Weather, IoT, etc. can publish independently once Core packages are live.
+1. **HVO.Core** — publish the primitives first when a domain package depends on its new version.
+2. **Native asset packages** — publish before their managed wrapper when both versions change.
+3. **Domain libraries** — Astronomy, Weather, IoT, and other packages publish independently after new dependencies are indexed.
 
 Example commands:
 
 ```bash
-git tag -a "HVO.Core/v1.1.1" -m "HVO.Core 1.1.1"
-git tag -a "HVO.Core.SourceGenerators/v1.1.1" -m "Source generators 1.1.1"
-git push origin "HVO.Core/v1.1.1" "HVO.Core.SourceGenerators/v1.1.1"
+git tag -a "HVO.Core/v1.1.2" -m "HVO.Core 1.1.2"
+git push origin "HVO.Core/v1.1.2"
 ```
 
 ## Coordinating With Telemetry

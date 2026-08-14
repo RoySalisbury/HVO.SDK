@@ -61,7 +61,7 @@ public class DavisVantageProConsoleRecordTests
         BitConverter.GetBytes(short.MaxValue).CopyTo(data, 44);
 
         // Storm rain at offset 46 = MaxValue (unavailable)
-        BitConverter.GetBytes(short.MaxValue).CopyTo(data, 46);
+        BitConverter.GetBytes(ushort.MaxValue).CopyTo(data, 46);
 
         // Storm start date at offset 48 = MaxValue (no storm)
         BitConverter.GetBytes(ushort.MaxValue).CopyTo(data, 48);
@@ -139,6 +139,7 @@ public class DavisVantageProConsoleRecordTests
         Assert.IsNull(record.OutsideTemperature);
         Assert.IsNull(record.WindSpeed);
         Assert.IsNull(record.OutsideHumidity);
+        Assert.IsNull(record.StormRain);
     }
 
     [TestMethod]
@@ -210,6 +211,13 @@ public class DavisVantageProConsoleRecordTests
         data[50] = (byte)(data[50] ^ 0xFF); // flip bits in a data byte
 
         Assert.IsFalse(DavisVantageProConsoleRecord.ValidatePacketCrc(data));
+    }
+
+    [TestMethod]
+    public void ValidatePacketCrc_NullOrShortPacket_ReturnsFalse()
+    {
+        Assert.IsFalse(DavisVantageProConsoleRecord.ValidatePacketCrc(null!));
+        Assert.IsFalse(DavisVantageProConsoleRecord.ValidatePacketCrc(new byte[98]));
     }
 
     [TestMethod]

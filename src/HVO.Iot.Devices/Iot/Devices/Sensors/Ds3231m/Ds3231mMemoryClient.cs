@@ -39,17 +39,22 @@ public class Ds3231mMemoryClient : MemoryI2cRegisterClient
     /// Sets the simulated date/time (stored as BCD in registers 0x00–0x06).
     /// </summary>
     /// <param name="value">The date/time to store (converted to UTC).</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is outside the supported years 2000 through 2199.</exception>
     public void SetDateTime(DateTimeOffset value)
     {
         var utc = value.ToUniversalTime();
-        var regs = RegisterSpan;
+        if (utc.Year < 2000 || utc.Year > 2199)
+        {
+            throw new ArgumentOutOfRangeException(nameof(value), "DS3231M supports years from 2000 through 2199.");
+        }
 
+        var regs = RegisterSpan;
         regs[TimeCalRegister + 0] = DecToBcd(utc.Second);
         regs[TimeCalRegister + 1] = DecToBcd(utc.Minute);
         regs[TimeCalRegister + 2] = DecToBcd(utc.Hour);
         regs[TimeCalRegister + 3] = (byte)((int)utc.DayOfWeek + 1);
         regs[TimeCalRegister + 4] = DecToBcd(utc.Day);
-        regs[TimeCalRegister + 5] = utc.Year >= 2000
+        regs[TimeCalRegister + 5] = utc.Year >= 2100
             ? (byte)(DecToBcd(utc.Month) | 0x80)
             : DecToBcd(utc.Month);
         regs[TimeCalRegister + 6] = DecToBcd(utc.Year % 100);

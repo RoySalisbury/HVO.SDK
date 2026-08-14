@@ -1,11 +1,11 @@
 ## HVO.Astronomy.CFITSIO
 
-A modern .NET 9 library for working with FITS files (Flexible Image Transport System) via CFITSIO. It ships:
+A modern .NET 10 library for working with FITS files (Flexible Image Transport System) via CFITSIO. It ships:
 
 - Source-generated P/Invoke bindings to CFITSIO with UTF‑8 marshalling and Cdecl calling convention
 - A safe, high-level managed API for images, headers, and compression
 - Optional SkiaSharp helpers to convert between FITS and common bitmap formats
-- Multi-RID native binaries packaged under `runtimes/**/native` for Linux, macOS, and Windows
+- Native binaries packaged for Linux ARM64 and macOS ARM64
 
 All public methods follow a non-throwing Result<T> pattern for reliable error handling at call sites.
 
@@ -52,9 +52,9 @@ The project enables overflow checking in Debug and Release, uses SafeHandle for 
     - `dotnet add package HVO.Astronomy.CFITSIO`
 - From source:
     - Add a project reference to `HVO.Astronomy.CFITSIO.csproj`
-    - Ensure your app targets .NET 9.0 or later
+    - Ensure your app targets .NET 10.0 or later
 
-No runtime setup is required—the package includes native CFITSIO binaries for all major platforms.
+No runtime setup is required on Linux ARM64 or macOS ARM64. Other platforms must provide a compatible native CFITSIO library separately.
 
 ## Design and structure
 
@@ -277,4 +277,4 @@ If you build a NuGet package via `dotnet pack`, the nupkg will include the nativ
 
 ## Contributing
 
-Issues and PRs are welcome. Please follow the repository coding standards (logging, Result<T> usage, and .NET 9 features) outlined in the workspace docs.
+Issues and PRs are welcome. Please follow the repository coding standards (logging, Result<T> usage, and .NET 10 features) outlined in the workspace docs.

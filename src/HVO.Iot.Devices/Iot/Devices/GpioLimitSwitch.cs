@@ -72,12 +72,6 @@ public class GpioLimitSwitch : IAsyncDisposable, IDisposable
     private long _lastEventTicks;
     
     /// <summary>
-    /// Records the type of the last pin event for debounce logic.
-    /// Used to prevent duplicate events of the same type.
-    /// </summary>
-    private PinEventTypes _lastEventType = PinEventTypes.None;
-
-    /// <summary>
     /// Indicates whether the limit switch is in simulation mode.
     /// When true, the IsTriggered property uses the simulated state instead of the actual GPIO pin.
     /// </summary>
@@ -810,39 +804,28 @@ public class GpioLimitSwitch : IAsyncDisposable, IDisposable
         try
         {
             var currentTicks = _stopwatch.ElapsedTicks;
-            var lastTicks = Interlocked.Read(ref _lastEventTicks);
-
-            // Fast-path debounce check without locking for better performance
-            // Skip debounce check for the first event (when lastTicks is 0)
-            if (lastTicks > 0 && currentTicks - lastTicks < _debounceTicks || 
-                (_lastEventType != PinEventTypes.None && _lastEventType == e.ChangeType))
-            {
-                _logger?.LogDebug("Debounced event on pin {Pin}: {Type} (filtered - too soon after last event)", 
-                    e.PinNumber, e.ChangeType);
-                return;
-            }
-
-            // Determine new pin value based on event type
             var newPinValue = e.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low;
 
-            // Thread-safe update of both cached pin value and event record
             lock (_objLock)
             {
-                // Re-check conditions after acquiring lock to handle race conditions
-                // Skip debounce check for the first event (when _lastEventTicks is 0)
-                if (_disposed || (_lastEventTicks > 0 && currentTicks - _lastEventTicks < _debounceTicks) || 
-                    (_lastEventType != PinEventTypes.None && _lastEventType == e.ChangeType))
+                if (_disposed)
                 {
-                    _logger?.LogDebug("Debounced event on pin {Pin}: {Type} (filtered - race condition detected)", 
+                    return;
+                }
+
+                // Even a filtered edge represents the hardware's latest state. Keeping the
+                // cache current prevents a short release from leaving a safety switch stuck.
+                _lastPinValue = newPinValue;
+                _pinValueInitialized = true;
+
+                if (_lastEventTicks > 0 && currentTicks - _lastEventTicks < _debounceTicks)
+                {
+                    _logger?.LogDebug("Debounced event on pin {Pin}: {Type} (filtered - too soon after last event)",
                         e.PinNumber, e.ChangeType);
                     return;
                 }
 
-                // Update cached pin value and event record atomically
-                _lastPinValue = newPinValue;
-                _pinValueInitialized = true;
                 _lastEventTicks = currentTicks;
-                _lastEventType = e.ChangeType;
             }
 
             // Log the valid limit switch trigger event

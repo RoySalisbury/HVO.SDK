@@ -5,17 +5,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>true</IsPackable>
     <PackageId>HVO.Iot.Devices</PackageId>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Description>IoT device abstractions and implementations for GPIO, I2C, Sequent Microsystems HATs, and environmental sensors (MLX90614, SI1145, TSL2591).</Description>
     <PackageTags>iot;gpio;i2c;raspberry-pi;sequent;hvo;mlx90614;si1145;tsl2591;sensors</PackageTags>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="4.1.0" />
-    <PackageReference Include="Iot.Device.Bindings" Version="4.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+    <PackageReference Include="System.Device.Gpio" Version="4.2.0" />
+    <PackageReference Include="Iot.Device.Bindings" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>

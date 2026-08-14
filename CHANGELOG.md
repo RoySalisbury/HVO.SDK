@@ -4,6 +4,22 @@ All notable changes documented here. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Changed
+
+- Updated the repository SDK baseline to .NET SDK 10.0.400 and current stable NuGet dependencies.
+- Updated `HVO.Astronomy.CFITSIO` to 2.0.0 for SkiaSharp 4 and restored its required public dependency on `HVO.Core`.
+- Updated package versions: `HVO.Core` 1.1.2, `HVO.Astronomy` 1.0.1, `HVO.Astronomy.TheSkyX` 1.0.1, `HVO.Iot.Devices` 1.2.1, `HVO.NinaClient` 1.0.1, `HVO.Power.OutbackMate` 1.0.1, `HVO.Weather.DavisVantagePro` 1.0.1, `HVO.Astronomy.CFITSIO.NativeAssets` 1.0.5, and `HVO.ZWOOptical.ASISDK` 0.0.5.
+- Corrected CFITSIO and ZWO package metadata to match the native runtime assets actually shipped.
+- Hardened package publishing to validate package IDs and tag versions and publish exactly one selected package.
+
+### Fixed
+
+- Prevented open NINA circuit breakers from executing HTTP requests and corrected API envelope deserialization, cancellation propagation, and retry classification.
+- Corrected DS3231M century and 12-hour clock decoding.
+- Corrected Moon azimuth normalization and Davis storm-rain unavailable-value handling.
+- Restored GPIO callback cleanup and base timer disposal for asynchronous button disposal, and kept limit-switch state synchronized across filtered debounce edges.
+- Corrected ZWO video error handling and product ID buffer sizing.
+
 ## [1.3.0] - 2026-03-04
 
 ### Added

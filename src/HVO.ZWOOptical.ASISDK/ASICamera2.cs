@@ -401,7 +401,7 @@ namespace HVO.ZWOOptical.ASISDK
             if (result == ASI_ERROR_CODE.ASI_ERROR_TIMEOUT)
                 return false;
 
-            //CheckReturn(result, MethodBase.GetCurrentMethod(), cameraId, buffer, bufferSize, waitMs);
+            CheckReturn(result, MethodBase.GetCurrentMethod(), cameraId, buffer, bufferSize, waitMs);
             return true;
         }
 
@@ -501,13 +501,15 @@ namespace HVO.ZWOOptical.ASISDK
 
         public static int[] GetProductIDs()
         {
-            // Allocate a reasonable buffer; function returns actual count.
-            int[] buffer = new int[64];
             try
             {
+                int connectedCameraCount = GetNumOfConnectedCameras();
+                if (connectedCameraCount <= 0) return Array.Empty<int>();
+
+                int[] buffer = new int[connectedCameraCount];
                 int count = ASIGetProductIDsNative(buffer);
                 if (count <= 0) return Array.Empty<int>();
-                if (count > buffer.Length) count = buffer.Length; // safety clamp
+                if (count > buffer.Length) count = buffer.Length;
                 return buffer.Take(count).ToArray();
             }
             catch

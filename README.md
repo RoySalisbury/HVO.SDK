@@ -9,7 +9,7 @@
 [![.NET Standard](https://img.shields.io/badge/.NET%20Standard-2.0-blue)](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Shared .NET utilities and functional patterns used across all HVO projects.
+Shared .NET libraries for observatory software, astronomy, weather, power, imaging, and hardware integration.
 
 ## Packages
 
@@ -17,13 +17,24 @@ Shared .NET utilities and functional patterns used across all HVO projects.
 |---------|--------|-------------|
 | **HVO.Core** | `netstandard2.0` | `Result<T>`, `Option<T>`, `OneOf<T1..T4>`, discriminated unions, guard clauses, extensions |
 | **HVO.Core.SourceGenerators** | `netstandard2.0` | Roslyn source generators (e.g., `[NamedOneOf]` attribute) |
+| **HVO.Astronomy** | `netstandard2.0` | Solar, lunar, planetary, twilight, and coordinate calculations |
+| **HVO.Astronomy.TheSkyX** | `netstandard2.0` | Software Bisque TheSkyX equipment integration |
+| **HVO.Astronomy.CFITSIO** | `net10.0` | Managed FITS image and header APIs with SkiaSharp integration |
+| **HVO.Astronomy.CFITSIO.NativeAssets** | `net10.0` | CFITSIO native assets for Linux ARM64 and macOS ARM64 |
+| **HVO.Iot.Devices** | `net8.0` | GPIO, I2C, HAT, RTC, and environmental sensor drivers |
+| **HVO.NinaClient** | `net8.0` | N.I.N.A. REST and WebSocket client |
+| **HVO.Power.OutbackMate** | `netstandard2.0` | Outback MATE serial protocol parser and monitor |
+| **HVO.Weather** | `netstandard2.0` | Weather models and CWOP/Weather Underground formatting |
+| **HVO.Weather.DavisVantagePro** | `netstandard2.0` | Davis Vantage Pro console protocol integration |
+| **HVO.ZWOOptical.ASISDK** | `netstandard2.0` | ZWO ASI camera SDK interop |
 
 ## Installation
 
 ```bash
 dotnet add package HVO.Core
-dotnet add package HVO.Core.SourceGenerators
 ```
+
+Replace `HVO.Core` with the package needed by your application. Package-specific platform notes are included in each NuGet package readme.
 
 ## Quick Start
 

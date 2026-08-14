@@ -474,6 +474,25 @@ namespace HVO.Iot.Devices.Tests
         }
 
         [TestMethod]
+        public void PinStateChanged_FilteredRelease_UpdatesStateAndAllowsNextPress()
+        {
+            _limitSwitch = CreateLimitSwitch(isPullup: true, debounceTime: TimeSpan.FromMilliseconds(100));
+            var eventCount = 0;
+            _limitSwitch.LimitSwitchTriggered += (_, _) => eventCount++;
+
+            SimulatePinStateChange(PinEventTypes.Falling);
+            SimulatePinStateChange(PinEventTypes.Rising);
+
+            Assert.AreEqual(PinValue.High, _limitSwitch.CurrentPinValue);
+
+            Thread.Sleep(120);
+            SimulatePinStateChange(PinEventTypes.Falling);
+
+            Assert.AreEqual(PinValue.Low, _limitSwitch.CurrentPinValue);
+            Assert.AreEqual(2, eventCount);
+        }
+
+        [TestMethod]
         public void PinStateChanged_WithDifferentEventTypes_ShouldTriggerEvents()
         {
             // Arrange - InputPullUp starts at High

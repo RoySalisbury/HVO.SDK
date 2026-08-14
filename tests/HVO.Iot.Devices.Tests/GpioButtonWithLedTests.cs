@@ -410,6 +410,17 @@ namespace HVO.Iot.Devices.Tests
             _buttonWithLed.Dispose(); // Should not throw
         }
 
+        [TestMethod]
+        public async Task DisposeAsync_ClosesInjectedControllerPins()
+        {
+            _buttonWithLed = CreateButtonWithLed();
+
+            await _buttonWithLed.DisposeAsync();
+
+            Assert.IsFalse(_gpioController!.IsPinOpen(ButtonPin));
+            Assert.IsFalse(_gpioController.IsPinOpen(LedPin));
+        }
+
         #endregion
 
         #region Stress Tests

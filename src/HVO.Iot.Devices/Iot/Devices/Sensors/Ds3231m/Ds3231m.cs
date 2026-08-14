@@ -109,13 +109,14 @@ public class Ds3231m : RegisterBasedI2cDevice, IDs3231m
                 Span<byte> buffer = stackalloc byte[7];
                 ReadBlock(TimeCalRegister, buffer);
 
-                var year = ((buffer[5] & 0x80) >> 7) == 1
-                    ? BcdToDec(buffer[6]) + 2000
-                    : BcdToDec(buffer[6]) + 1900;
+                var year = BcdToDec(buffer[6]) + 2000 + ((buffer[5] & 0x80) != 0 ? 100 : 0);
 
                 var month = BcdToDec(buffer[5] & 0x1F);
                 var day = BcdToDec(buffer[4]);
-                var hour = BcdToDec(buffer[2]);
+                var hourRegister = buffer[2];
+                var hour = (hourRegister & 0x40) != 0
+                    ? BcdToDec(hourRegister & 0x1F) % 12 + ((hourRegister & 0x20) != 0 ? 12 : 0)
+                    : BcdToDec(hourRegister & 0x3F);
                 var minute = BcdToDec(buffer[1]);
                 var second = BcdToDec(buffer[0]);
 
@@ -139,6 +140,10 @@ public class Ds3231m : RegisterBasedI2cDevice, IDs3231m
         try
         {
             var utc = value.ToUniversalTime();
+            if (utc.Year < 2000 || utc.Year > 2199)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "DS3231M supports years from 2000 through 2199.");
+            }
 
             lock (Sync)
             {
@@ -149,7 +154,7 @@ public class Ds3231m : RegisterBasedI2cDevice, IDs3231m
                 data[2] = DecToBcd(utc.Hour);
                 data[3] = (byte)((int)utc.DayOfWeek + 1);
                 data[4] = DecToBcd(utc.Day);
-                data[5] = utc.Year >= 2000
+                data[5] = utc.Year >= 2100
                     ? (byte)(DecToBcd(utc.Month) | 0x80)
                     : DecToBcd(utc.Month);
                 data[6] = DecToBcd(utc.Year % 100);

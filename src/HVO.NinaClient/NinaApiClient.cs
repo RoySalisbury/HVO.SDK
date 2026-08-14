@@ -2616,41 +2616,27 @@ public class NinaApiClient : INinaApiClient, IDisposable
         if (_disposed)
             throw new ObjectDisposedException(nameof(NinaApiClient));
 
-        // LAYER 1: Retry Policy - Handles transient failures
-        // This applies exponential backoff retry logic for network timeouts, 
-        // temporary API errors, and other recoverable failures
-        var retryResult = await RetryPolicy.ExecuteWithRetryAsync(
-            operation,                                              // The actual API call to execute
-            _options.MaxRetryAttempts,                             // Max attempts (e.g., 3)
-            TimeSpan.FromMilliseconds(_options.RetryDelayMs),      // Base delay between retries (e.g., 1000ms)
-            _logger);                                              // Logger for retry attempts
+        Task<Result<T>> ExecuteWithRetryAsync() => RetryPolicy.ExecuteWithRetryAsync(
+            operation,
+            _options.MaxRetryAttempts,
+            TimeSpan.FromMilliseconds(_options.RetryDelayMs),
+            _logger);
 
-        // LAYER 2: Circuit Breaker - Prevents cascading failures
-        // If enabled, this wraps the retry result to track failure patterns
-        // and "open" the circuit if too many failures occur
+        // The circuit breaker must wrap execution so an open circuit prevents the request.
         if (_circuitBreaker != null)
         {
-            // Circuit breaker evaluates the retry result and decides:
-            // - CLOSED: Normal operation, passes through the result
-            // - OPEN: Too many failures, immediately fails without calling operation
-            // - HALF-OPEN: Testing recovery, allows one attempt to check if service is healthy
-            return await _circuitBreaker.ExecuteAsync(() => Task.FromResult(retryResult));
+            return await _circuitBreaker.ExecuteAsync(ExecuteWithRetryAsync);
         }
 
-        // If no circuit breaker configured, return the retry result directly
-        return retryResult;
+        return await ExecuteWithRetryAsync();
     }
 
     /// <summary>
     /// Sends a GET request to the specified endpoint and deserializes the JSON "Response"
     /// property to type <typeparamref name="T"/>.
     /// 
-    /// NOTE: This method always extracts and deserializes the inner "Response" payload from
-    /// the NINA API envelope. When <typeparamref name="T"/> is a wrapper type such as
-    /// <c>NinaApiResponse&lt;TInner&gt;</c>, the inner payload (not the full envelope) is
-    /// deserialized into <typeparamref name="T"/>. This works because the wrapper types
-    /// inherit from <c>NinaApiResponse&lt;T&gt;</c> which has a <c>Response</c> property
-    /// that maps to the inner data. The pattern was validated in the original HVOv9 codebase.
+    /// Envelope response types are deserialized from the complete response document; all
+    /// other types are deserialized from the inner "Response" payload.
     /// </summary>
     private async Task<Result<T>> GetAsync<T>(string endpoint, CancellationToken cancellationToken = default)
         where T : class
@@ -2659,7 +2645,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
         {
             _logger.LogTrace("GET request to {Endpoint}", endpoint);
 
-            var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+            using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!response.IsSuccessStatusCode)
@@ -2676,7 +2662,7 @@ public class NinaApiClient : INinaApiClient, IDisposable
             var deserializationType = GetDeserializationType<T>();
 
             // Deserialize to the appropriate type
-            var jsonDocument = JsonDocument.Parse(content);
+            using var jsonDocument = JsonDocument.Parse(content);
             var responseElement = jsonDocument.RootElement.GetProperty("Response");
             var successElement = jsonDocument.RootElement.TryGetProperty("Success", out var success) ? success : default;
             var errorElement = jsonDocument.RootElement.TryGetProperty("Error", out var error) ? error : default;
@@ -2697,8 +2683,10 @@ public class NinaApiClient : INinaApiClient, IDisposable
                 return Result<T>.Failure(nullDataException);
             }
 
-            // Deserialize to the intermediate type
-            var deserializedData = JsonSerializer.Deserialize(responseElement.GetRawText(), deserializationType, _jsonOptions);
+            var elementToDeserialize = IsEnvelopeType(deserializationType)
+                ? jsonDocument.RootElement
+                : responseElement;
+            var deserializedData = JsonSerializer.Deserialize(elementToDeserialize.GetRawText(), deserializationType, _jsonOptions);
 
             if (deserializedData == null)
             {
@@ -2712,6 +2700,10 @@ public class NinaApiClient : INinaApiClient, IDisposable
 
             _logger.LogTrace("Successfully retrieved data from {Endpoint}", endpoint);
             return Result<T>.Success(convertedData);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
         {
@@ -2756,6 +2748,10 @@ public class NinaApiClient : INinaApiClient, IDisposable
         // For other types, deserialize to the requested type directly
         return requestedType;
     }
+
+    private static bool IsEnvelopeType(Type type) =>
+        type.GetProperty(nameof(NinaApiResponse<object>.Response)) != null &&
+        type.GetProperty(nameof(NinaApiResponse<object>.Success))?.PropertyType == typeof(bool);
 
     /// <summary>
     /// Converts the deserialized data to the requested type T

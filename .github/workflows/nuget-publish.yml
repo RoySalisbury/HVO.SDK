@@ -34,16 +34,14 @@ on:
         default: nuget.org
 
 jobs:
-  # ── Always runs: build + test + pack validation ──
+  # Always runs: build + test + pack validation
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: |
-            9.0.x
-            10.0.x
+          dotnet-version: 10.0.x
       - name: Build
         run: dotnet build --configuration Release
       - name: Test
@@ -52,17 +50,100 @@ jobs:
   pack:
     needs: build-and-test
     runs-on: ubuntu-latest
+    outputs:
+      package_file: ${{ steps.validate.outputs.package_file }}
+      symbol_file: ${{ steps.validate.outputs.symbol_file }}
+      has_symbols: ${{ steps.validate.outputs.has_symbols }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: |
-            9.0.x
-            10.0.x
+          dotnet-version: 10.0.x
+      - name: Select and validate package
+        id: package
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            PACKAGE_NAME="${{ github.event.inputs.package }}"
+            TAG_VERSION=""
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+            if [[ "$TAG" != */v* ]]; then
+              echo "Invalid package tag '$TAG'; expected <PackageId>/v<SemVer>" >&2
+              exit 1
+            fi
+            PACKAGE_NAME="${TAG%%/v*}"
+            TAG_VERSION="${TAG#*/v}"
+          fi
+
+          case "$PACKAGE_NAME" in
+            HVO.Core) PROJECT_PATH="src/HVO.Core/HVO.Core.csproj" ;;
+            HVO.Core.SourceGenerators) PROJECT_PATH="src/HVO.Core.SourceGenerators/HVO.Core.SourceGenerators.csproj" ;;
+            HVO.Iot.Devices) PROJECT_PATH="src/HVO.Iot.Devices/HVO.Iot.Devices.csproj" ;;
+            HVO.Astronomy) PROJECT_PATH="src/HVO.Astronomy/HVO.Astronomy.csproj" ;;
+            HVO.Astronomy.CFITSIO) PROJECT_PATH="src/HVO.Astronomy.CFITSIO/HVO.Astronomy.CFITSIO.csproj" ;;
+            HVO.Astronomy.CFITSIO.NativeAssets) PROJECT_PATH="src/HVO.Astronomy.CFITSIO.NativeAssets/HVO.Astronomy.CFITSIO.NativeAssets.csproj" ;;
+            HVO.Astronomy.TheSkyX) PROJECT_PATH="src/HVO.Astronomy.TheSkyX/HVO.Astronomy.TheSkyX.csproj" ;;
+            HVO.Weather) PROJECT_PATH="src/HVO.Weather/HVO.Weather.csproj" ;;
+            HVO.Weather.DavisVantagePro) PROJECT_PATH="src/HVO.Weather.DavisVantagePro/HVO.Weather.DavisVantagePro.csproj" ;;
+            HVO.Power.OutbackMate) PROJECT_PATH="src/HVO.Power.OutbackMate/HVO.Power.OutbackMate.csproj" ;;
+            HVO.NinaClient) PROJECT_PATH="src/HVO.NinaClient/HVO.NinaClient.csproj" ;;
+            HVO.ZWOOptical.ASISDK) PROJECT_PATH="src/HVO.ZWOOptical.ASISDK/HVO.ZWOOptical.ASISDK.csproj" ;;
+            *) echo "Unknown package '$PACKAGE_NAME'" >&2; exit 1 ;;
+          esac
+
+          METADATA=$(dotnet msbuild "$PROJECT_PATH" -getProperty:PackageId -getProperty:PackageVersion)
+          PACKAGE_ID=$(jq -r '.Properties.PackageId' <<< "$METADATA")
+          PACKAGE_VERSION=$(jq -r '.Properties.PackageVersion' <<< "$METADATA")
+
+          if [[ "$PACKAGE_ID" != "$PACKAGE_NAME" ]]; then
+            echo "Selected package '$PACKAGE_NAME' does not match project PackageId '$PACKAGE_ID'" >&2
+            exit 1
+          fi
+          if [[ -n "$TAG_VERSION" && "$TAG_VERSION" != "$PACKAGE_VERSION" ]]; then
+            echo "Tag version '$TAG_VERSION' does not match project version '$PACKAGE_VERSION'" >&2
+            exit 1
+          fi
+
+          {
+            echo "project_path=$PROJECT_PATH"
+            echo "package_id=$PACKAGE_ID"
+            echo "package_version=$PACKAGE_VERSION"
+          } >> "$GITHUB_OUTPUT"
+          echo "Packing $PACKAGE_ID $PACKAGE_VERSION from $PROJECT_PATH"
       - name: Build
         run: dotnet build --configuration Release
-      - name: Pack all projects
-        run: dotnet pack --configuration Release --no-build --output ./artifacts
+      - name: Pack selected project
+        run: dotnet pack "${{ steps.package.outputs.project_path }}" --configuration Release --no-build --output ./artifacts
+      - name: Validate package artifacts
+        id: validate
+        run: |
+          shopt -s nullglob
+          packages=(./artifacts/*.nupkg)
+          symbols=(./artifacts/*.snupkg)
+
+          if (( ${#packages[@]} != 1 )); then
+            echo "Expected exactly one package, found ${#packages[@]}" >&2
+            exit 1
+          fi
+
+          EXPECTED="${{ steps.package.outputs.package_id }}.${{ steps.package.outputs.package_version }}.nupkg"
+          PACKAGE_FILE=$(basename "${packages[0]}")
+          if [[ "$PACKAGE_FILE" != "$EXPECTED" ]]; then
+            echo "Expected package '$EXPECTED', found '$PACKAGE_FILE'" >&2
+            exit 1
+          fi
+
+          echo "package_file=$PACKAGE_FILE" >> "$GITHUB_OUTPUT"
+          if (( ${#symbols[@]} == 1 )); then
+            echo "symbol_file=$(basename "${symbols[0]}")" >> "$GITHUB_OUTPUT"
+            echo "has_symbols=true" >> "$GITHUB_OUTPUT"
+          elif (( ${#symbols[@]} == 0 )); then
+            echo "symbol_file=" >> "$GITHUB_OUTPUT"
+            echo "has_symbols=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Expected at most one symbol package, found ${#symbols[@]}" >&2
+            exit 1
+          fi
       - uses: actions/upload-artifact@v7
         with:
           name: nuget-packages
@@ -70,7 +151,7 @@ jobs:
             ./artifacts/*.nupkg
             ./artifacts/*.snupkg
 
-  # ── Only on tag push or manual dispatch: publish ──
+  # Only on tag push or manual dispatch: publish
   publish-nuget:
     needs: pack
     if: >
@@ -83,27 +164,16 @@ jobs:
         with:
           name: nuget-packages
           path: ./artifacts
-      - name: Determine package filter
-        id: filter
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            PACKAGE_NAME="${{ github.event.inputs.package }}"
-          else
-            # Extract package name from tag: "HVO.Core/v1.1.1" -> "HVO.Core"
-            TAG="${GITHUB_REF#refs/tags/}"
-            PACKAGE_NAME="${TAG%%/v*}"
-          fi
-          echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
-          echo "Publishing package: ${PACKAGE_NAME}"
       - name: Push to NuGet.org
         run: >
-          dotnet nuget push "./artifacts/${{ steps.filter.outputs.package_name }}.*.nupkg"
+          dotnet nuget push "./artifacts/${{ needs.pack.outputs.package_file }}"
           --api-key ${{ secrets.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
       - name: Push symbols to NuGet.org
+        if: needs.pack.outputs.has_symbols == 'true'
         run: >
-          dotnet nuget push "./artifacts/${{ steps.filter.outputs.package_name }}.*.snupkg"
+          dotnet nuget push "./artifacts/${{ needs.pack.outputs.symbol_file }}"
           --api-key ${{ secrets.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
@@ -122,27 +192,16 @@ jobs:
         with:
           name: nuget-packages
           path: ./artifacts
-      - name: Determine package filter
-        id: filter
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            PACKAGE_NAME="${{ github.event.inputs.package }}"
-          else
-            # Extract package name from tag: "HVO.Core/v1.1.1" -> "HVO.Core"
-            TAG="${GITHUB_REF#refs/tags/}"
-            PACKAGE_NAME="${TAG%%/v*}"
-          fi
-          echo "package_name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
-          echo "Publishing package: ${PACKAGE_NAME}"
       - name: Push to GitHub Packages
         run: >
-          dotnet nuget push "./artifacts/${{ steps.filter.outputs.package_name }}.*.nupkg"
+          dotnet nuget push "./artifacts/${{ needs.pack.outputs.package_file }}"
           --api-key ${{ secrets.GITHUB_TOKEN }}
           --source https://nuget.pkg.github.com/RoySalisbury/index.json
           --skip-duplicate
       - name: Push symbols to GitHub Packages
+        if: needs.pack.outputs.has_symbols == 'true'
         run: >
-          dotnet nuget push "./artifacts/${{ steps.filter.outputs.package_name }}.*.snupkg"
+          dotnet nuget push "./artifacts/${{ needs.pack.outputs.symbol_file }}"
           --api-key ${{ secrets.GITHUB_TOKEN }}
           --source https://nuget.pkg.github.com/RoySalisbury/index.json
           --skip-duplicate
