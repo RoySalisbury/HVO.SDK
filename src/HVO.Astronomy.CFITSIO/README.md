@@ -277,4 +277,4 @@ If you build a NuGet package via `dotnet pack`, the nupkg will include the nativ
 
 ## Contributing
 
-Issues and PRs are welcome. Please follow the repository coding standards (logging, Result<T> usage, and .NET 9 features) outlined in the workspace docs.
+Issues and PRs are welcome. Please follow the repository coding standards (logging, Result<T> usage, and .NET 10 features) outlined in the workspace docs.

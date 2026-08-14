@@ -72,11 +72,6 @@ public class GpioLimitSwitch : IAsyncDisposable, IDisposable
     private long _lastEventTicks;
     
     /// <summary>
-    /// Records the type of the last pin event for debounce logic.
-    /// Used to prevent duplicate events of the same type.
-    /// </summary>
-
-    /// <summary>
     /// Indicates whether the limit switch is in simulation mode.
     /// When true, the IsTriggered property uses the simulated state instead of the actual GPIO pin.
     /// </summary>

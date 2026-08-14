@@ -172,6 +172,19 @@ public class Ds3231mTests
         result.Error.Should().BeOfType<ArgumentOutOfRangeException>();
     }
 
+    [TestMethod]
+    public void MemoryClient_UnsupportedYear_DoesNotPartiallyUpdateRegisters()
+    {
+        var (rtc, client) = CreateRtc();
+        var expected = new DateTimeOffset(2025, 6, 15, 12, 30, 45, TimeSpan.Zero);
+        client.SetDateTime(expected);
+
+        var action = () => client.SetDateTime(new DateTimeOffset(1999, 1, 2, 3, 4, 5, TimeSpan.Zero));
+
+        action.Should().Throw<ArgumentOutOfRangeException>();
+        rtc.GetDateTime().Value.Should().Be(expected);
+    }
+
     #endregion
 
     #region Temperature
