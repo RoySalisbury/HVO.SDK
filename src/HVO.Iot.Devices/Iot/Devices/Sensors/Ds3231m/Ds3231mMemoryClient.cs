@@ -39,6 +39,7 @@ public class Ds3231mMemoryClient : MemoryI2cRegisterClient
     /// Sets the simulated date/time (stored as BCD in registers 0x00–0x06).
     /// </summary>
     /// <param name="value">The date/time to store (converted to UTC).</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is outside the supported years 2000 through 2199.</exception>
     public void SetDateTime(DateTimeOffset value)
     {
         var utc = value.ToUniversalTime();
