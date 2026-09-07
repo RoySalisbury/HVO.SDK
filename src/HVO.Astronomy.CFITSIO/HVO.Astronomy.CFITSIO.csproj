@@ -24,10 +24,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="4.151.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.151.1" PrivateAssets="all" />
-    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="4.151.1" PrivateAssets="all" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.151.1" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp" Version="4.151.2" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.151.2" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="4.151.2" PrivateAssets="all" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.151.2" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
